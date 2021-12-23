@@ -41,6 +41,8 @@ Device *Device::getInstance() {
 Device::Device() {
     Device::instance = this;
     _features.fill(false);
+    // support all format by default
+    _formatFeatures.fill(static_cast<TextureUsage>(std::numeric_limits<std::underlying_type<TextureUsage>::type>::max()));
 }
 
 Device::~Device() {
