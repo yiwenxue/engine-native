@@ -42,8 +42,6 @@ struct EnumHasher final {
 };
 
 unordered_map<Format, Feature, EnumHasher> featureCheckMap{
-    {Format::RGB8, Feature::FORMAT_RGB8},
-    {Format::R11G11B10F, Feature::FORMAT_R11G11B10F},
 };
 } // namespace
 
@@ -62,8 +60,12 @@ void TextureValidator::doInit(const TextureInfo &info) {
     _inited = true;
 
     CCASSERT(info.width && info.height && info.depth, "zero-sized texture?");
-    // CCASSERT(!featureCheckMap.count(_info.format) || DeviceValidator::getInstance()->hasFeature(featureCheckMap[_info.format]), "unsupported format");
-    CCASSERT(hasAllFlags(DeviceValidator::getInstance()->getFormatFeatures(info.format), info.usage), "Format not supported for the specified features");
+
+    FormatFeature ff = FormatFeature::RENDER_TARGET;
+    if (info.usage == TextureUsage::SAMPLED) ff |= FormatFeature::SAMPLED_TEXTURE;
+    if (info.usage == TextureUsage::STORAGE) ff |= FormatFeature::STORAGE_TEXTURE;
+
+    CCASSERT(hasAllFlags(DeviceValidator::getInstance()->getFormatFeatures(info.format), ff), "Format not supported for the specified features");
     /////////// execute ///////////
 
     _actor->initialize(info);

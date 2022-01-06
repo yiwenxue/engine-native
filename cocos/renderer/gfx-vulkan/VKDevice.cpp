@@ -40,11 +40,13 @@
 #include "VKSwapchain.h"
 #include "VKTexture.h"
 #include "VKUtils.h"
+#include "gfx-base/GFXDef-common.h"
 #include "states/VKGlobalBarrier.h"
 #include "states/VKSampler.h"
 #include "states/VKTextureBarrier.h"
 
 #include "gfx-base/SPIRVUtils.h"
+#include "vulkan/vulkan_core.h"
 
 CC_DISABLE_WARNINGS()
 #define VMA_IMPLEMENTATION
@@ -97,6 +99,8 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
     const VkPhysicalDeviceFeatures & deviceFeatures  = deviceFeatures2.features;
     //const VkPhysicalDeviceVulkan11Features &deviceVulkan11Features = _gpuContext->physicalDeviceVulkan11Features;
     //const VkPhysicalDeviceVulkan12Features &deviceVulkan12Features = _gpuContext->physicalDeviceVulkan12Features;
+
+    _textureExclusive.fill(true);
 
     ///////////////////// Device Creation /////////////////////
 
@@ -227,20 +231,70 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
     };
     findPreferredDepthFormat(depthStencilFormatPriorityList, 3, &_gpuDevice->depthStencilFormat);
 
-    _features[toNumber(Feature::COLOR_FLOAT)]               = true;
-    _features[toNumber(Feature::COLOR_HALF_FLOAT)]          = true;
-    _features[toNumber(Feature::TEXTURE_FLOAT)]             = true;
-    _features[toNumber(Feature::TEXTURE_HALF_FLOAT)]        = true;
-    _features[toNumber(Feature::TEXTURE_FLOAT_LINEAR)]      = true;
-    _features[toNumber(Feature::TEXTURE_HALF_FLOAT_LINEAR)] = true;
-    _features[toNumber(Feature::FORMAT_R11G11B10F)]         = true;
-    _features[toNumber(Feature::FORMAT_SRGB)]               = true;
-    _features[toNumber(Feature::ELEMENT_INDEX_UINT)]        = true;
-    _features[toNumber(Feature::INSTANCED_ARRAYS)]          = true;
-    _features[toNumber(Feature::MULTIPLE_RENDER_TARGETS)]   = true;
-    _features[toNumber(Feature::BLEND_MINMAX)]              = true;
-    _features[toNumber(Feature::COMPUTE_SHADER)]            = true;
-    _features[toNumber(Feature::INPUT_ATTACHMENT_BENEFIT)]  = true;
+    _features[toNumber(Feature::ELEMENT_INDEX_UINT)]       = true;
+    _features[toNumber(Feature::INSTANCED_ARRAYS)]         = true;
+    _features[toNumber(Feature::MULTIPLE_RENDER_TARGETS)]  = true;
+    _features[toNumber(Feature::BLEND_MINMAX)]             = true;
+    _features[toNumber(Feature::COMPUTE_SHADER)]           = true;
+    _features[toNumber(Feature::INPUT_ATTACHMENT_BENEFIT)] = true;
+
+    const auto           formatLen     = static_cast<size_t>(Format::COUNT);
+    VkFormatProperties   properties    = {};
+    VkFormat             format        = {};
+    VkFormatFeatureFlags formatFeature = {};
+    for (int i = 0; i < formatLen; ++i) {
+        format = mapVkFormat(static_cast<Format>(i), _gpuDevice);
+        vkGetPhysicalDeviceFormatProperties(_gpuContext->physicalDevice, format, &properties);
+
+        // render buffer support
+        formatFeature = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
+        if (properties.optimalTilingFeatures & formatFeature) {
+            _formatFeatures[i] |= FormatFeature::RENDER_TARGET;
+            setTextureExclusive(static_cast<Format>(i), false);
+        }
+        // texture storage support
+        formatFeature = VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT;
+        if (properties.linearTilingFeatures & formatFeature) {
+            _formatFeatures[i] |= FormatFeature::STORAGE_TEXTURE & FormatFeature::RENDER_TARGET;
+        }
+        // sampled render target support
+        formatFeature = VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT;
+        if (properties.optimalTilingFeatures & formatFeature) {
+            _formatFeatures[i] |= FormatFeature::SAMPLED_TEXTURE & FormatFeature::RENDER_TARGET;
+        }
+        // linear filter support
+        formatFeature = VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT;
+        if (properties.optimalTilingFeatures & formatFeature) {
+            _formatFeatures[i] |= FormatFeature::LINEAR_FILTER;
+        }
+        // vertex attribute support
+        formatFeature = VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT;
+        if (properties.bufferFeatures & formatFeature) {
+            _formatFeatures[i] |= FormatFeature::VERTEX_ATTRIBUTE;
+        }
+    }
+
+    String compressedFmts;
+
+    if ((_formatFeatures[toNumber(Format::BC1_SRGB_ALPHA)] & FormatFeature::RENDER_TARGET) != FormatFeature::NONE) {
+        compressedFmts += "dxt ";
+    }
+
+    if ((_formatFeatures[toNumber(Format::ETC_RGB8)] & FormatFeature::RENDER_TARGET) != FormatFeature::NONE) {
+        compressedFmts += "etc ";
+    }
+
+    if ((_formatFeatures[toNumber(Format::ETC2_RGBA8)] & FormatFeature::RENDER_TARGET) != FormatFeature::NONE) {
+        compressedFmts += "etc2 ";
+    }
+
+    if ((_formatFeatures[toNumber(Format::ASTC_RGBA_4X4)] & FormatFeature::RENDER_TARGET) != FormatFeature::NONE) {
+        compressedFmts += "astc ";
+    }
+
+    if ((_formatFeatures[toNumber(Format::PVRTC_RGBA2)] & FormatFeature::RENDER_TARGET) != FormatFeature::NONE) {
+        compressedFmts += "pvrtc ";
+    }
 
     _gpuDevice->useMultiDrawIndirect        = deviceFeatures.multiDrawIndirect;
     _gpuDevice->useDescriptorUpdateTemplate = _gpuDevice->minorVersion > 0 || checkExtension(VK_KHR_DESCRIPTOR_UPDATE_TEMPLATE_EXTENSION_NAME);
@@ -251,24 +305,6 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
         _gpuDevice->createRenderPass2 = vkCreateRenderPass2KHR;
     } else {
         _gpuDevice->createRenderPass2 = vkCreateRenderPass2KHRFallback;
-    }
-
-    if (isFormatSupported(_gpuContext->physicalDevice, VK_FORMAT_R8G8B8_UNORM)) {
-        _features[toNumber(Feature::FORMAT_RGB8)] = true;
-    }
-
-    String compressedFmts;
-    if (isFormatSupported(_gpuContext->physicalDevice, VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK)) {
-        _features[toNumber(Feature::FORMAT_ETC2)] = true;
-        compressedFmts += "etc2 ";
-    }
-    if (isFormatSupported(_gpuContext->physicalDevice, VK_FORMAT_PVRTC1_2BPP_UNORM_BLOCK_IMG)) {
-        _features[toNumber(Feature::FORMAT_PVRTC)] = true;
-        compressedFmts += "pvrtc ";
-    }
-    if (isFormatSupported(_gpuContext->physicalDevice, VK_FORMAT_ASTC_4x4_UNORM_BLOCK)) {
-        _features[toNumber(Feature::FORMAT_ASTC)] = true;
-        compressedFmts += "astc ";
     }
 
     const VkPhysicalDeviceLimits &limits = _gpuContext->physicalDeviceProperties.limits;

@@ -71,6 +71,24 @@ void DescriptorSetValidator::doDestroy() {
 void DescriptorSetValidator::update() {
     CCASSERT(isInited(), "alread destroyed?");
 
+    const auto descriptorCount = _textures.size();
+
+    Texture *texture = nullptr;
+    Sampler *sampler = nullptr;
+    Format format  = {};
+
+    for (size_t i = 0; i < descriptorCount; ++i) {
+        texture = _textures[i];
+        sampler = _samplers[i];
+        format  = texture->getInfo().format;
+
+        if (sampler->getInfo().magFilter == Filter::LINEAR ||
+            sampler->getInfo().mipFilter == Filter::LINEAR ||
+            sampler->getInfo().minFilter == Filter::LINEAR) {
+            CCASSERT(hasFlag(DeviceValidator::getInstance()->getFormatFeatures(format), FormatFeature::LINEAR_FILTER), "Texture is not linearly filterable.");
+        }
+    }
+
     if (!_isDirty) return;
 
     _isDirty = false;

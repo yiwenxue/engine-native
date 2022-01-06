@@ -41,8 +41,7 @@ Device *Device::getInstance() {
 Device::Device() {
     Device::instance = this;
     _features.fill(false);
-    // support all format by default
-    _formatFeatures.fill(static_cast<TextureUsage>(std::numeric_limits<std::underlying_type<TextureUsage>::type>::max()));
+    _formatFeatures.fill(static_cast<FormatFeature>(FormatFeature::NONE));
 }
 
 Device::~Device() {
@@ -59,9 +58,9 @@ bool Device::initialize(const DeviceInfo &info) {
     }
 
 #if CC_CPU_ARCH == CC_CPU_ARCH_32
-    static_assert(sizeof(void*) == 4, "pointer size assumption broken");
+    static_assert(sizeof(void *) == 4, "pointer size assumption broken");
 #else
-    static_assert(sizeof(void*) == 8, "pointer size assumption broken");
+    static_assert(sizeof(void *) == 8, "pointer size assumption broken");
 #endif
 
     return doInit(info);
@@ -89,7 +88,7 @@ void Device::destroy() {
 }
 
 void Device::destroySurface(void *windowHandle) {
-    for (auto *swapchain :_swapchains) {
+    for (auto *swapchain : _swapchains) {
         if (swapchain->getWindowHandle() == windowHandle) {
             swapchain->destroySurface();
             break;
@@ -98,7 +97,7 @@ void Device::destroySurface(void *windowHandle) {
 }
 
 void Device::createSurface(void *windowHandle) {
-    for (auto *swapchain :_swapchains) {
+    for (auto *swapchain : _swapchains) {
         if (!swapchain->getWindowHandle()) {
             swapchain->createSurface(windowHandle);
             break;

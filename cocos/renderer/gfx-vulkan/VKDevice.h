@@ -25,9 +25,10 @@
 
 #pragma once
 
+#include <cstring>
 #include "VKStd.h"
 #include "gfx-base/GFXDevice.h"
-#include <cstring>
+
 
 namespace cc {
 namespace gfx {
@@ -94,6 +95,8 @@ public:
     inline CCVKGPUFramebufferHub *  gpuFramebufferHub() { return _gpuFramebufferHub; }
     inline CCVKGPUDescriptorSetHub *gpuDescriptorSetHub() { return _gpuDescriptorSetHub; }
 
+    inline bool checkTextureExclusive(const Format &format) { return _textureExclusive[static_cast<size_t>(format)]; };
+
     CCVKGPUFencePool *        gpuFencePool();
     CCVKGPURecycleBin *       gpuRecycleBin();
     CCVKGPUStagingBufferPool *gpuStagingBufferPool();
@@ -131,6 +134,8 @@ protected:
     void copyTextureToBuffers(Texture *src, uint8_t *const *buffers, const BufferTextureCopy *region, uint32_t count) override;
     void getQueryPoolResults(QueryPool *queryPool) override;
 
+    void setTextureExclusive(const Format &format, const bool key) { _textureExclusive[static_cast<size_t>(format)] = key; };
+
     void destroySwapchain();
     bool checkSwapchainStatus();
 
@@ -152,6 +157,8 @@ protected:
 
     vector<const char *> _layers;
     vector<const char *> _extensions;
+
+    std::array<bool, static_cast<size_t>(Format::COUNT)> _textureExclusive;
 };
 
 } // namespace gfx

@@ -53,7 +53,6 @@ GLenum mapGLFormat(Format format) {
         case Format::RGB8SN:
         case Format::RGB16F:
         case Format::RGB32F:
-        case Format::R11G11B10F:
         case Format::R5G6B5:
         case Format::SRGB8: return GL_RGB;
         case Format::RGBA8:
@@ -78,8 +77,6 @@ GLenum mapGLFormat(Format format) {
         case Format::BC3_SRGB: return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
 
         case Format::ETC_RGB8: return GL_ETC1_RGB8_OES;
-        case Format::ETC2_RGB8: return GL_COMPRESSED_RGB8_ETC2;
-        case Format::ETC2_RGBA8: return GL_COMPRESSED_RGBA8_ETC2_EAC;
 
         case Format::PVRTC_RGB2: return GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
         case Format::PVRTC_RGBA2: return GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
@@ -126,10 +123,8 @@ GLenum mapGLFormat(Format format) {
 GLenum mapGLInternalFormat(Format format) {
     switch (format) {
         case Format::R8: return GL_R8_EXT;
-        case Format::R8SN: return GL_R8_SNORM;
-        case Format::RG8SN: return GL_RG8_SNORM;
+        case Format::RG8: return GL_RG8_EXT;
         case Format::SRGB8: return GL_SRGB_EXT;
-        case Format::RGBA8SN: return GL_RGBA8_SNORM;
         case Format::SRGB8_A8: return GL_SRGB_ALPHA_EXT;
         case Format::R16F: return GL_R16F_EXT;
         case Format::RG16F: return GL_RG16F_EXT;
@@ -256,7 +251,6 @@ GLenum formatToGLType(Format format) {
         case Format::R5G6B5: return GL_UNSIGNED_SHORT_5_6_5;
         case Format::RGB5A1: return GL_UNSIGNED_SHORT_5_5_5_1;
         case Format::RGBA4: return GL_UNSIGNED_SHORT_4_4_4_4;
-        case Format::R11G11B10F: return GL_FLOAT;
         case Format::RGB9E5: return GL_FLOAT;
 
         case Format::DEPTH: return GL_UNSIGNED_SHORT;
@@ -278,11 +272,6 @@ GLenum formatToGLType(Format format) {
         case Format::BC7_SRGB:
 
         case Format::ETC_RGB8:
-        case Format::ETC2_RGB8:
-        case Format::ETC2_RGBA8:
-        case Format::ETC2_SRGB8:
-        case Format::ETC2_RGB8_A1:
-        case Format::ETC2_SRGB8_A1:
         case Format::EAC_R11: return GL_UNSIGNED_BYTE;
         case Format::EAC_R11SN: return GL_BYTE;
         case Format::EAC_RG11: return GL_UNSIGNED_BYTE;
@@ -609,7 +598,7 @@ void cmdFuncGLES2CreateTexture(GLES2Device *device, GLES2GPUTexture *gpuTexture)
         return;
     }
 
-    if (gpuTexture->glSamples > 1 || hasAllFlags(TextureUsage::COLOR_ATTACHMENT | TextureUsage::DEPTH_STENCIL_ATTACHMENT, gpuTexture->usage)) {
+    if (!device->checkTextureExclusive(gpuTexture->format) && gpuTexture->glSamples > 1 || hasAllFlags(TextureUsage::COLOR_ATTACHMENT | TextureUsage::DEPTH_STENCIL_ATTACHMENT, gpuTexture->usage)) {
         gpuTexture->glInternalFmt = mapGLInternalFormat(gpuTexture->format);
         switch (gpuTexture->type) {
             case TextureType::TEX2D: {
@@ -990,7 +979,7 @@ void cmdFuncGLES2CreateShader(GLES2Device *device, GLES2GPUShader *gpuShader) {
 
         for (size_t i = 0; i < gpuShader->glBlocks.size(); ++i) {
             GLES2GPUUniformBlock &gpuBlock = gpuShader->glBlocks[i];
-            UniformBlock &        block    = gpuShader->blocks[i];
+            UniformBlock         &block    = gpuShader->blocks[i];
 
             gpuBlock.name    = block.name;
             gpuBlock.set     = block.set;
@@ -999,7 +988,7 @@ void cmdFuncGLES2CreateShader(GLES2Device *device, GLES2GPUShader *gpuShader) {
 
             for (size_t j = 0; j < gpuBlock.glUniforms.size(); ++j) {
                 GLES2GPUUniform &gpuUniform = gpuBlock.glUniforms[j];
-                Uniform &        uniform    = block.members[j];
+                Uniform         &uniform    = block.members[j];
 
                 gpuUniform.binding = INVALID_BINDING;
                 gpuUniform.name    = uniform.name;
@@ -1031,7 +1020,7 @@ void cmdFuncGLES2CreateShader(GLES2Device *device, GLES2GPUShader *gpuShader) {
         gpuShader->glSamplerTextures.resize(gpuShader->samplerTextures.size());
 
         for (size_t i = 0; i < gpuShader->glSamplerTextures.size(); ++i) {
-            UniformSamplerTexture &        samplerTexture    = gpuShader->samplerTextures[i];
+            UniformSamplerTexture         &samplerTexture    = gpuShader->samplerTextures[i];
             GLES2GPUUniformSamplerTexture &gpuSamplerTexture = gpuShader->glSamplerTextures[i];
             gpuSamplerTexture.set                            = samplerTexture.set;
             gpuSamplerTexture.binding                        = samplerTexture.binding;
@@ -1091,7 +1080,7 @@ void cmdFuncGLES2CreateShader(GLES2Device *device, GLES2GPUShader *gpuShader) {
             gpuBlock.size += gpuUniform.size;
         }
         for (uint32_t i = 0; i < gpuBlock.glActiveUniforms.size(); ++i) {
-            auto &   activeUniform = gpuBlock.glActiveUniforms[i];
+            auto    &activeUniform = gpuBlock.glActiveUniforms[i];
             uint32_t index         = gpuBlock.activeUniformIndices[i];
             activeUniform.offset   = gpuBlock.glUniforms[index].offset;
         }
@@ -1100,8 +1089,8 @@ void cmdFuncGLES2CreateShader(GLES2Device *device, GLES2GPUShader *gpuShader) {
     // texture unit index mapping optimization
     vector<GLES2GPUUniformSamplerTexture> glActiveSamplerTextures;
     vector<GLint>                         glActiveSamplerLocations;
-    const BindingMappingInfo &            bindingMappingInfo = device->bindingMappingInfo();
-    unordered_map<String, uint32_t> &     texUnitCacheMap    = device->stateCache()->texUnitCacheMap;
+    const BindingMappingInfo             &bindingMappingInfo = device->bindingMappingInfo();
+    unordered_map<String, uint32_t>      &texUnitCacheMap    = device->stateCache()->texUnitCacheMap;
 
     // sampler bindings in the flexible set comes strictly after buffer bindings
     // so we need to subtract the buffer count for these samplers
@@ -1266,7 +1255,7 @@ void cmdFuncGLES2CreateInputAssembler(GLES2Device *device, GLES2GPUInputAssemble
     gpuInputAssembler->glAttribs.resize(gpuInputAssembler->attributes.size());
     for (size_t i = 0; i < gpuInputAssembler->glAttribs.size(); ++i) {
         GLES2GPUAttribute &gpuAttribute = gpuInputAssembler->glAttribs[i];
-        const Attribute &  attrib       = gpuInputAssembler->attributes[i];
+        const Attribute   &attrib       = gpuInputAssembler->attributes[i];
 
         auto *gpuVB = static_cast<GLES2GPUBuffer *>(gpuInputAssembler->gpuVertexBuffers[attrib.stream]);
 
@@ -1300,14 +1289,14 @@ void cmdFuncGLES2DestroyInputAssembler(GLES2Device *device, GLES2GPUInputAssembl
     gpuInputAssembler->glVAOs.clear();
 }
 
-static GLES2GPUFramebuffer::GLFramebufferInfo doCreateFramebuffer(GLES2Device *                    device,
+static GLES2GPUFramebuffer::GLFramebufferInfo doCreateFramebuffer(GLES2Device                     *device,
                                                                   const vector<GLES2GPUTexture *> &attachments, const uint32_t *colors, size_t colorCount,
                                                                   const GLES2GPUTexture *depthStencil,
-                                                                  const uint32_t *       resolves            = nullptr,
+                                                                  const uint32_t        *resolves            = nullptr,
                                                                   const GLES2GPUTexture *depthStencilResolve = nullptr,
-                                                                  GLbitfield *           resolveMask         = nullptr) {
+                                                                  GLbitfield            *resolveMask         = nullptr) {
     static vector<GLenum>                  drawBuffers;
-    GLES2GPUStateCache *                   cache = device->stateCache();
+    GLES2GPUStateCache                    *cache = device->stateCache();
     GLES2GPUFramebuffer::GLFramebufferInfo res;
 
     GL_CHECK(glGenFramebuffers(1, &res.glFramebuffer));
@@ -1516,7 +1505,7 @@ void cmdFuncGLES2BeginRenderPass(GLES2Device *device, uint32_t subpassIdx, GLES2
     static vector<GLenum> invalidAttachments;
 
     GLES2GPUStateCache *cache         = device->stateCache();
-    GLES2ObjectCache &  gfxStateCache = cache->gfxStateCache;
+    GLES2ObjectCache   &gfxStateCache = cache->gfxStateCache;
     gfxStateCache.subpassIdx          = subpassIdx;
     if (subpassIdx) {
         gpuRenderPass  = gfxStateCache.gpuRenderPass;
@@ -1699,12 +1688,12 @@ void cmdFuncGLES2BeginRenderPass(GLES2Device *device, uint32_t subpassIdx, GLES2
 void cmdFuncGLES2EndRenderPass(GLES2Device *device) {
     static vector<GLenum> invalidAttachments;
 
-    GLES2GPUStateCache * cache                = device->stateCache();
-    GLES2ObjectCache &   gfxStateCache        = cache->gfxStateCache;
-    GLES2GPURenderPass * gpuRenderPass        = gfxStateCache.gpuRenderPass;
+    GLES2GPUStateCache  *cache                = device->stateCache();
+    GLES2ObjectCache    &gfxStateCache        = cache->gfxStateCache;
+    GLES2GPURenderPass  *gpuRenderPass        = gfxStateCache.gpuRenderPass;
     GLES2GPUFramebuffer *gpuFramebuffer       = gfxStateCache.gpuFramebuffer;
-    const auto &         instance             = gpuFramebuffer->usesFBF ? gpuFramebuffer->uberInstance : gpuFramebuffer->instances[gfxStateCache.subpassIdx];
-    const SubpassInfo &  subpass              = gpuRenderPass->subpasses[gfxStateCache.subpassIdx];
+    const auto          &instance             = gpuFramebuffer->usesFBF ? gpuFramebuffer->uberInstance : gpuFramebuffer->instances[gfxStateCache.subpassIdx];
+    const SubpassInfo   &subpass              = gpuRenderPass->subpasses[gfxStateCache.subpassIdx];
     bool                 isTheLastSubpass     = gfxStateCache.subpassIdx == gpuRenderPass->subpasses.size() - 1;
     GLuint               glFramebuffer        = instance.framebuffer.getFramebuffer();
     GLuint               glResolveFramebuffer = instance.resolveFramebuffer.getFramebuffer();
@@ -1808,8 +1797,8 @@ void cmdFuncGLES2EndRenderPass(GLES2Device *device) {
 
             if (gpuFramebuffer->uberOnChipOutput != INVALID_BINDING) {
                 TextureBlit region;
-                auto *      blitSrc    = gpuFramebuffer->gpuColorTextures[gpuFramebuffer->uberOnChipOutput];
-                auto *      blitDst    = gpuFramebuffer->gpuColorTextures[gpuFramebuffer->uberFinalOutput];
+                auto       *blitSrc    = gpuFramebuffer->gpuColorTextures[gpuFramebuffer->uberOnChipOutput];
+                auto       *blitDst    = gpuFramebuffer->gpuColorTextures[gpuFramebuffer->uberFinalOutput];
                 region.srcExtent.width = region.dstExtent.width = blitSrc->width;
                 region.srcExtent.height = region.dstExtent.height = blitSrc->height;
                 cmdFuncGLES2BlitTexture(device, blitSrc, blitDst, &region, 1, Filter::POINT);
@@ -2005,7 +1994,7 @@ void cmdFuncGLES2BindState(GLES2Device *device, GLES2GPUPipelineState *gpuPipeli
         }
 
         if (!gpuPipelineState->bs.targets.empty()) {
-            BlendTarget &      cacheTarget = cache->bs.targets[0];
+            BlendTarget       &cacheTarget = cache->bs.targets[0];
             const BlendTarget &target      = gpuPipelineState->bs.targets[0];
             if (cacheTarget.blend != target.blend) {
                 if (!cacheTarget.blend) {
@@ -2049,20 +2038,20 @@ void cmdFuncGLES2BindState(GLES2Device *device, GLES2GPUPipelineState *gpuPipeli
     if (gpuPipelineState && gpuPipelineState->gpuShader && gpuPipelineState->gpuPipelineLayout) {
         size_t                     blockLen{gpuPipelineState->gpuShader->glBlocks.size()};
         const vector<vector<int>> &dynamicOffsetIndices{gpuPipelineState->gpuPipelineLayout->dynamicOffsetIndices};
-        uint8_t *                  uniformBuffBase{nullptr};
-        uint8_t *                  uniformBuff{nullptr};
-        uint8_t *                  uniformCachedBuff{nullptr};
+        uint8_t                   *uniformBuffBase{nullptr};
+        uint8_t                   *uniformBuff{nullptr};
+        uint8_t                   *uniformCachedBuff{nullptr};
 
         for (size_t j = 0; j < blockLen; j++) {
             GLES2GPUUniformBlock &glBlock = gpuPipelineState->gpuShader->glBlocks[j];
 
             const GLES2GPUDescriptorSet *gpuDescriptorSet = gpuDescriptorSets[glBlock.set];
             const uint32_t               descriptorIndex  = gpuDescriptorSet->descriptorIndices->at(glBlock.binding);
-            const GLES2GPUDescriptor &   gpuDescriptor    = gpuDescriptorSet->gpuDescriptors[descriptorIndex];
+            const GLES2GPUDescriptor    &gpuDescriptor    = gpuDescriptorSet->gpuDescriptors[descriptorIndex];
 
             if (!gpuDescriptor.gpuBuffer && !gpuDescriptor.gpuBufferView) {
-                //CC_LOG_ERROR("Buffer binding '%s' at set %d binding %d is not bounded",
-                //             glBlock.name.c_str(), glBlock.set, glBlock.binding);
+                // CC_LOG_ERROR("Buffer binding '%s' at set %d binding %d is not bounded",
+                //              glBlock.name.c_str(), glBlock.set, glBlock.binding);
                 continue;
             }
 
@@ -2178,14 +2167,14 @@ void cmdFuncGLES2BindState(GLES2Device *device, GLES2GPUPipelineState *gpuPipeli
 
             const GLES2GPUDescriptorSet *gpuDescriptorSet = gpuDescriptorSets[glSamplerTexture.set];
             const uint32_t               descriptorIndex  = gpuDescriptorSet->descriptorIndices->at(glSamplerTexture.binding);
-            const GLES2GPUDescriptor *   gpuDescriptor    = &gpuDescriptorSet->gpuDescriptors[descriptorIndex];
+            const GLES2GPUDescriptor    *gpuDescriptor    = &gpuDescriptorSet->gpuDescriptors[descriptorIndex];
 
             for (size_t u = 0; u < glSamplerTexture.units.size(); u++, gpuDescriptor++) {
                 auto unit = static_cast<uint32_t>(glSamplerTexture.units[u]);
 
                 if (!gpuDescriptor->gpuTexture || !gpuDescriptor->gpuSampler) {
-                    //CC_LOG_ERROR("Sampler texture '%s' at set %d binding %d index %d is not bounded",
-                    //             glSamplerTexture.name.c_str(), glSamplerTexture.set, glSamplerTexture.binding, u);
+                    // CC_LOG_ERROR("Sampler texture '%s' at set %d binding %d index %d is not bounded",
+                    //              glSamplerTexture.name.c_str(), glSamplerTexture.set, glSamplerTexture.binding, u);
                     continue;
                 }
 
@@ -2448,8 +2437,8 @@ void cmdFuncGLES2BindState(GLES2Device *device, GLES2GPUPipelineState *gpuPipeli
 }
 
 void cmdFuncGLES2Draw(GLES2Device *device, const DrawInfo &drawInfo) {
-    GLES2ObjectCache &      gfxStateCache     = device->stateCache()->gfxStateCache;
-    GLES2GPUPipelineState * gpuPipelineState  = gfxStateCache.gpuPipelineState;
+    GLES2ObjectCache       &gfxStateCache     = device->stateCache()->gfxStateCache;
+    GLES2GPUPipelineState  *gpuPipelineState  = gfxStateCache.gpuPipelineState;
     GLES2GPUInputAssembler *gpuInputAssembler = gfxStateCache.gpuInputAssembler;
     GLenum                  glPrimitive       = gfxStateCache.glPrimitive;
 
@@ -2756,7 +2745,7 @@ void cmdFuncGLES2ExecuteCmds(GLES2Device *device, GLES2CmdPackage *cmdPackage) {
 
     for (uint32_t i = 0; i < cmdPackage->cmds.size(); ++i) {
         GLESCmdType cmdType = cmdPackage->cmds[i];
-        uint32_t &  cmdIdx  = cmdIndices[static_cast<int>(cmdType)];
+        uint32_t   &cmdIdx  = cmdIndices[static_cast<int>(cmdType)];
 
         switch (cmdType) {
             case GLESCmdType::BEGIN_RENDER_PASS: {
@@ -2935,8 +2924,8 @@ static void ensureScissorRect(GLES2GPUStateCache *cache, int32_t x, int32_t y, u
 void GLES2GPUBlitManager::draw(GLES2GPUTexture *gpuTextureSrc, GLES2GPUTexture *gpuTextureDst,
                                const TextureBlit *regions, uint32_t count, Filter filter) {
     GLES2GPUDescriptorSet *gpuDescriptorSet = &_gpuDescriptorSet;
-    GLES2Device *          device           = GLES2Device::getInstance();
-    auto &                 descriptor       = _gpuDescriptorSet.gpuDescriptors.back();
+    GLES2Device           *device           = GLES2Device::getInstance();
+    auto                  &descriptor       = _gpuDescriptorSet.gpuDescriptors.back();
 
     descriptor.gpuTexture = gpuTextureSrc;
     descriptor.gpuSampler = filter == Filter::POINT ? &_gpuPointSampler : &_gpuLinearSampler;

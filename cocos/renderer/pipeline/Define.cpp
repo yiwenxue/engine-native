@@ -507,14 +507,12 @@ uint nextPow2(uint val) {
 }
 
 bool supportsHalfFloatTexture(gfx::Device *device) {
-    return device->hasFeature(gfx::Feature::COLOR_HALF_FLOAT) &&
-           device->hasFeature(gfx::Feature::TEXTURE_HALF_FLOAT) &&
+    return (device->getFormatFeatures(gfx::Format::RGBA16F) & gfx::FormatFeature::RENDER_TARGET) != gfx::FormatFeature::NONE &&
            device->getGfxAPI() != gfx::API::GLES2;
 }
 
 bool supportsFloatTexture(gfx::Device *device) {
-    return device->hasFeature(gfx::Feature::COLOR_FLOAT) &&
-           device->hasFeature(gfx::Feature::TEXTURE_FLOAT) &&
+    return (device->getFormatFeatures(gfx::Format::RGBA32F) & gfx::FormatFeature::RENDER_TARGET) != gfx::FormatFeature::NONE &&
            device->getGfxAPI() != gfx::API::GLES2;
 }
 

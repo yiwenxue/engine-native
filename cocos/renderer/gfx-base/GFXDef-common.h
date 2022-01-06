@@ -123,6 +123,7 @@ enum class API : uint32_t {
     GLES3,
     METAL,
     VULKAN,
+    NVN,
     WEBGL,
     WEBGL2,
     WEBGPU,
@@ -138,20 +139,6 @@ enum class SurfaceTransform : uint32_t {
 CC_ENUM_CONVERSION_OPERATOR(SurfaceTransform);
 
 enum class Feature : uint32_t {
-    COLOR_FLOAT,
-    COLOR_HALF_FLOAT,
-    TEXTURE_FLOAT,
-    TEXTURE_HALF_FLOAT,
-    TEXTURE_FLOAT_LINEAR,
-    TEXTURE_HALF_FLOAT_LINEAR,
-    FORMAT_R11G11B10F,
-    FORMAT_SRGB,
-    FORMAT_ETC1,
-    FORMAT_ETC2,
-    FORMAT_DXT,
-    FORMAT_PVRTC,
-    FORMAT_ASTC,
-    FORMAT_RGB8,
     ELEMENT_INDEX_UINT,
     INSTANCED_ARRAYS,
     MULTIPLE_RENDER_TARGETS,
@@ -275,11 +262,11 @@ enum class Format : uint32_t {
 
     // Ericsson Texture Compression Format
     ETC_RGB8,
-    ETC2_RGB8,
+    ETC2_RGB8, // exists
     ETC2_SRGB8,
     ETC2_RGB8_A1,
     ETC2_SRGB8_A1,
-    ETC2_RGBA8,
+    ETC2_RGBA8, // exists
     ETC2_SRGB8_A8,
     EAC_R11,
     EAC_R11SN,
@@ -468,6 +455,17 @@ enum class TextureFlagBit : uint32_t {
 };
 using TextureFlags = TextureFlagBit;
 CC_ENUM_BITWISE_OPERATORS(TextureFlagBit);
+
+enum class FormatFeatureBit : uint32_t {
+    NONE             = 0,
+    RENDER_TARGET    = 0x1,  // Texture or renderBuffer
+    SAMPLED_TEXTURE  = 0x2,  // allow shaders to read a texture through a sampler
+    LINEAR_FILTER    = 0x4,  // allow using linear filter and copy from texture to texture linearly
+    STORAGE_TEXTURE  = 0x8,  // allow performing texture reads without sampling and store to arbitrary positions in shaders
+    VERTEX_ATTRIBUTE = 0x10, // use this format as vertex inputs
+};
+using FormatFeature = FormatFeatureBit;
+CC_ENUM_BITWISE_OPERATORS(FormatFeatureBit);
 
 enum class SampleCount : uint32_t {
     ONE,                  // Single sample

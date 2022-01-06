@@ -80,6 +80,8 @@ public:
         });
     }
 
+    inline bool checkTextureExclusive(const Format &format) { return _textureExclusive[static_cast<size_t>(format)]; };
+
 protected:
     static GLES2Device *instance;
 
@@ -110,9 +112,9 @@ protected:
     void copyTextureToBuffers(Texture *src, uint8_t *const *buffers, const BufferTextureCopy *region, uint32_t count) override;
     void getQueryPoolResults(QueryPool *queryPool) override {}
 
-    void bindContext(bool bound) override;
+    void setTextureExclusive(const Format &format, const bool key) { _textureExclusive[static_cast<size_t>(format)] = key; };
 
-    static bool checkForETC2();
+    void bindContext(bool bound) override;
 
     GLES2GPUContext *            _gpuContext{nullptr};
     GLES2GPUStateCache *         _gpuStateCache{nullptr};
@@ -122,6 +124,8 @@ protected:
     GLES2GPUFramebufferCacheMap *_gpuFramebufferCacheMap{nullptr};
 
     vector<GLES2GPUSwapchain *> _swapchains;
+
+    std::array<bool, static_cast<size_t>(Format::COUNT)> _textureExclusive;
 
     StringArray _extensions;
 };
