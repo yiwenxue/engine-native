@@ -112,9 +112,9 @@ protected:
     void copyTextureToBuffers(Texture *src, uint8_t *const *buffers, const BufferTextureCopy *region, uint32_t count) override;
     void getQueryPoolResults(QueryPool *queryPool) override {}
 
-    void setTextureExclusive(const Format &format, const bool key) { _textureExclusive[static_cast<size_t>(format)] = key; };
-
     void bindContext(bool bound) override;
+
+    void initFormatFeature();
 
     GLES2GPUContext *            _gpuContext{nullptr};
     GLES2GPUStateCache *         _gpuStateCache{nullptr};

@@ -83,10 +83,10 @@ bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
         return false;
     };
 
-    _textureExclusive.fill(true);
-
     String extStr = reinterpret_cast<const char *>(glGetString(GL_EXTENSIONS));
     _extensions   = StringUtil::split(extStr, " ");
+
+    initFormatFeature();
 
     _multithreadedSubmission = false;
 
@@ -99,167 +99,6 @@ bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
         _features[toNumber(Feature::COMPUTE_SHADER)] = true;
     }
 
-    const FormatFeature completeFeature = FormatFeature::RENDER_TARGET | FormatFeature::SAMPLED_TEXTURE | FormatFeature::LINEAR_FILTER | FormatFeature::STORAGE_TEXTURE;
-    FormatFeature       tempFeature     = completeFeature;
-
-    // builtin
-    tempFeature = completeFeature | FormatFeature::VERTEX_ATTRIBUTE;
-
-    _formatFeatures[toNumber(Format::R8)]    = tempFeature;
-    _formatFeatures[toNumber(Format::RG8)]   = tempFeature;
-    _formatFeatures[toNumber(Format::RGB8)]  = tempFeature;
-    _formatFeatures[toNumber(Format::RGBA8)] = tempFeature;
-
-    tempFeature = completeFeature;
-
-    _formatFeatures[toNumber(Format::R8SN)]    = tempFeature;
-    _formatFeatures[toNumber(Format::RG8SN)]   = tempFeature;
-    _formatFeatures[toNumber(Format::RGB8SN)]  = tempFeature;
-    _formatFeatures[toNumber(Format::RGBA8SN)] = tempFeature;
-    _formatFeatures[toNumber(Format::R5G6B5)]  = tempFeature;
-    _formatFeatures[toNumber(Format::RGBA4)]   = tempFeature;
-    _formatFeatures[toNumber(Format::RGB5A1)]  = tempFeature;
-    _formatFeatures[toNumber(Format::RGB10A2)] = tempFeature;
-
-    _formatFeatures[toNumber(Format::SRGB8)]    = tempFeature;
-    _formatFeatures[toNumber(Format::SRGB8_A8)] = tempFeature;
-
-    _formatFeatures[toNumber(Format::R11G11B10F)] = tempFeature;
-    _formatFeatures[toNumber(Format::RGB9E5)]     = tempFeature;
-
-    _formatFeatures[toNumber(Format::DEPTH)]         = tempFeature;
-    _formatFeatures[toNumber(Format::DEPTH_STENCIL)] = tempFeature;
-
-    removeFlags(tempFeature, FormatFeature::SAMPLED_TEXTURE);
-    // _formatFeatures[toNumber(Format::RGB10A2UI)] = completeFeature ^ FormatFeature::SAMPLED_TEXTURE;
-    _formatFeatures[toNumber(Format::RGB10A2UI)] = tempFeature;
-
-    // tempFeature = completeFeature ^ FormatFeature::LINEAR_FILTER | FormatFeature::VERTEX_ATTRIBUTE;
-    tempFeature = completeFeature | FormatFeature::VERTEX_ATTRIBUTE;
-    removeFlags(tempFeature, FormatFeature::LINEAR_FILTER);
-
-    _formatFeatures[toNumber(Format::R16F)]    = tempFeature;
-    _formatFeatures[toNumber(Format::RG16F)]   = tempFeature;
-    _formatFeatures[toNumber(Format::RGB16F)]  = tempFeature;
-    _formatFeatures[toNumber(Format::RGBA16F)] = tempFeature;
-
-    // tempFeature = completeFeature ^ FormatFeature::SAMPLED_TEXTURE ^ FormatFeature::LINEAR_FILTER | FormatFeature::VERTEX_ATTRIBUTE;
-    tempFeature = completeFeature | FormatFeature::VERTEX_ATTRIBUTE;
-    removeFlags(tempFeature, FormatFeature::SAMPLED_TEXTURE & FormatFeature::LINEAR_FILTER);
-
-    _formatFeatures[toNumber(Format::R32F)]    = tempFeature;
-    _formatFeatures[toNumber(Format::RG32F)]   = tempFeature;
-    _formatFeatures[toNumber(Format::RGB32F)]  = tempFeature;
-    _formatFeatures[toNumber(Format::RGBA32F)] = tempFeature;
-
-    // tempFeature = completeFeature ^ FormatFeature::SAMPLED_TEXTURE | FormatFeature::VERTEX_ATTRIBUTE;
-    tempFeature = completeFeature | FormatFeature::VERTEX_ATTRIBUTE;
-    removeFlags(tempFeature, FormatFeature::SAMPLED_TEXTURE);
-
-    _formatFeatures[toNumber(Format::RGB10A2UI)] = completeFeature ^ FormatFeature::SAMPLED_TEXTURE;
-
-    _formatFeatures[toNumber(Format::R8I)]   = tempFeature;
-    _formatFeatures[toNumber(Format::R8UI)]  = tempFeature;
-    _formatFeatures[toNumber(Format::R16I)]  = tempFeature;
-    _formatFeatures[toNumber(Format::R16UI)] = tempFeature;
-    _formatFeatures[toNumber(Format::R32I)]  = tempFeature;
-    _formatFeatures[toNumber(Format::R32UI)] = tempFeature;
-
-    _formatFeatures[toNumber(Format::RG8I)]   = tempFeature;
-    _formatFeatures[toNumber(Format::RG8UI)]  = tempFeature;
-    _formatFeatures[toNumber(Format::RG16I)]  = tempFeature;
-    _formatFeatures[toNumber(Format::RG16UI)] = tempFeature;
-    _formatFeatures[toNumber(Format::RG32I)]  = tempFeature;
-    _formatFeatures[toNumber(Format::RG32UI)] = tempFeature;
-
-    _formatFeatures[toNumber(Format::RGB8I)]   = tempFeature;
-    _formatFeatures[toNumber(Format::RGB8UI)]  = tempFeature;
-    _formatFeatures[toNumber(Format::RGB16I)]  = tempFeature;
-    _formatFeatures[toNumber(Format::RGB16UI)] = tempFeature;
-    _formatFeatures[toNumber(Format::RGB32I)]  = tempFeature;
-    _formatFeatures[toNumber(Format::RGB32UI)] = tempFeature;
-
-    _formatFeatures[toNumber(Format::RGBA8I)]   = tempFeature;
-    _formatFeatures[toNumber(Format::RGBA8UI)]  = tempFeature;
-    _formatFeatures[toNumber(Format::RGBA16I)]  = tempFeature;
-    _formatFeatures[toNumber(Format::RGBA16UI)] = tempFeature;
-    _formatFeatures[toNumber(Format::RGBA32I)]  = tempFeature;
-    _formatFeatures[toNumber(Format::RGBA32UI)] = tempFeature;
-
-    setTextureExclusive(Format::R8, false);
-    setTextureExclusive(Format::RG8, false);
-    setTextureExclusive(Format::RGB8, false);
-    setTextureExclusive(Format::R5G6B5, false);
-    setTextureExclusive(Format::RGBA4, false);
-
-    setTextureExclusive(Format::RGB5A1, false);
-    setTextureExclusive(Format::RGBA8, false);
-    setTextureExclusive(Format::RGB10A2, false);
-    setTextureExclusive(Format::RGB10A2UI, false);
-    setTextureExclusive(Format::SRGB8_A8, false);
-
-    setTextureExclusive(Format::R8I, false);
-    setTextureExclusive(Format::R8UI, false);
-    setTextureExclusive(Format::R16I, false);
-    setTextureExclusive(Format::R16UI, false);
-    setTextureExclusive(Format::R32I, false);
-    setTextureExclusive(Format::R32UI, false);
-
-    setTextureExclusive(Format::RG8I, false);
-    setTextureExclusive(Format::RG8UI, false);
-    setTextureExclusive(Format::RG16I, false);
-    setTextureExclusive(Format::RG16UI, false);
-    setTextureExclusive(Format::RG32I, false);
-    setTextureExclusive(Format::RG32UI, false);
-
-    setTextureExclusive(Format::RGBA8I, false);
-    setTextureExclusive(Format::RGBA8UI, false);
-    setTextureExclusive(Format::RGBA16I, false);
-    setTextureExclusive(Format::RGBA16UI, false);
-    setTextureExclusive(Format::RGBA32I, false);
-    setTextureExclusive(Format::RGBA32UI, false);
-
-    setTextureExclusive(Format::DEPTH, false);
-    setTextureExclusive(Format::DEPTH_STENCIL, false);
-
-    // Not supported, for ES 3.0 only
-    if (checkExtension("render_snorm")) {
-        // https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_render_snorm.txt
-        // For 16, see https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_texture_norm16.txt
-        setTextureExclusive(Format::R8SN, false);
-        setTextureExclusive(Format::RG8SN, false);
-        setTextureExclusive(Format::RGB8SN, false);
-        setTextureExclusive(Format::RGBA8SN, false);
-    }
-
-    if (checkExtension("color_buffer_float")) {
-        setTextureExclusive(Format::R32F, false);
-        setTextureExclusive(Format::RG32F, false);
-        setTextureExclusive(Format::RGB32F, false);
-        setTextureExclusive(Format::RGBA32F, false);
-    }
-    if (checkExtension("color_buffer_half_float")) {
-        setTextureExclusive(Format::R16F, false);
-        setTextureExclusive(Format::RG16F, false);
-        setTextureExclusive(Format::RGB16F, false);
-        setTextureExclusive(Format::RGBA16F, false);
-    }
-
-    if (checkExtension("texture_float_linear")) {
-        // https: //www.khronos.org/registry/OpenGL/extensions/OES/OES_texture_float_linear.txt
-        _formatFeatures[toNumber(Format::RGB32F)] |= FormatFeature::LINEAR_FILTER;
-        _formatFeatures[toNumber(Format::RGBA32F)] |= FormatFeature::LINEAR_FILTER;
-        _formatFeatures[toNumber(Format::R32F)] |= FormatFeature::LINEAR_FILTER;
-        _formatFeatures[toNumber(Format::RG32F)] |= FormatFeature::LINEAR_FILTER;
-    }
-
-    if (checkExtension("texture_half_float_linear")) {
-        // https: //www.khronos.org/registry/OpenGL/extensions/OES/OES_texture_float_linear.txt
-        _formatFeatures[toNumber(Format::RGB16F)] |= FormatFeature::LINEAR_FILTER;
-        _formatFeatures[toNumber(Format::RGBA16F)] |= FormatFeature::LINEAR_FILTER;
-        _formatFeatures[toNumber(Format::R16F)] |= FormatFeature::LINEAR_FILTER;
-        _formatFeatures[toNumber(Format::RG16F)] |= FormatFeature::LINEAR_FILTER;
-    }
 
     String fbfLevelStr = "NONE";
     // PVRVFrame has issues on their support
@@ -301,59 +140,17 @@ bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
 
     String compressedFmts;
 
-    const FormatFeature compressedFeature = FormatFeature::RENDER_TARGET | FormatFeature::SAMPLED_TEXTURE | FormatFeature::LINEAR_FILTER;
-
     if (checkExtension("compressed_ETC1")) {
-        _formatFeatures[toNumber(Format::ETC_RGB8)] = compressedFeature;
         compressedFmts += "etc1 ";
     }
 
-    _formatFeatures[toNumber(Format::ETC2_RGB8)]     = compressedFeature;
-    _formatFeatures[toNumber(Format::ETC2_RGBA8)]    = compressedFeature;
-    _formatFeatures[toNumber(Format::ETC2_SRGB8)]    = compressedFeature;
-    _formatFeatures[toNumber(Format::ETC2_SRGB8_A8)] = compressedFeature;
-    _formatFeatures[toNumber(Format::ETC2_RGB8_A1)]  = compressedFeature;
-    _formatFeatures[toNumber(Format::ETC2_SRGB8_A1)] = compressedFeature;
     compressedFmts += "etc2 ";
 
     if (checkExtension("texture_compression_pvrtc")) {
-        _formatFeatures[toNumber(Format::PVRTC_RGB2)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::PVRTC_RGBA2)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::PVRTC_RGB4)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::PVRTC_RGBA4)] |= compressedFeature;
         compressedFmts += "pvrtc ";
     }
 
     if (checkExtension("texture_compression_astc")) {
-        _formatFeatures[toNumber(Format::ASTC_RGBA_4X4)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_RGBA_5X4)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_RGBA_5X5)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_RGBA_6X5)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_RGBA_6X6)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_RGBA_8X5)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_RGBA_8X6)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_RGBA_8X8)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_RGBA_10X5)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_RGBA_10X6)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_RGBA_10X8)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_RGBA_10X10)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_RGBA_12X10)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_RGBA_12X12)] |= compressedFeature;
-
-        _formatFeatures[toNumber(Format::ASTC_SRGBA_4X4)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_SRGBA_5X4)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_SRGBA_5X5)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_SRGBA_6X5)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_SRGBA_6X6)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_SRGBA_8X5)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_SRGBA_8X6)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_SRGBA_8X8)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X5)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X6)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X8)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X10)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_SRGBA_12X10)] |= compressedFeature;
-        _formatFeatures[toNumber(Format::ASTC_SRGBA_12X12)] |= compressedFeature;
         compressedFmts += "astc ";
     }
 
@@ -458,6 +255,221 @@ void GLES3Device::present() {
 
 void GLES3Device::bindContext(bool bound) {
     _gpuContext->bindContext(bound);
+}
+
+void GLES3Device::initFormatFeature() {
+    _textureExclusive.fill(true);
+
+    const FormatFeature completeFeature = FormatFeature::RENDER_TARGET | FormatFeature::SAMPLED_TEXTURE | FormatFeature::LINEAR_FILTER | FormatFeature::STORAGE_TEXTURE;
+    FormatFeature       tempFeature     = completeFeature;
+
+    // builtin
+    tempFeature = completeFeature | FormatFeature::VERTEX_ATTRIBUTE;
+
+    _formatFeatures[toNumber(Format::R8)]    = tempFeature;
+    _formatFeatures[toNumber(Format::RG8)]   = tempFeature;
+    _formatFeatures[toNumber(Format::RGB8)]  = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA8)] = tempFeature;
+
+    tempFeature = completeFeature;
+
+    _formatFeatures[toNumber(Format::R8SN)]    = tempFeature;
+    _formatFeatures[toNumber(Format::RG8SN)]   = tempFeature;
+    _formatFeatures[toNumber(Format::RGB8SN)]  = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA8SN)] = tempFeature;
+    _formatFeatures[toNumber(Format::R5G6B5)]  = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA4)]   = tempFeature;
+    _formatFeatures[toNumber(Format::RGB5A1)]  = tempFeature;
+    _formatFeatures[toNumber(Format::RGB10A2)] = tempFeature;
+
+    _formatFeatures[toNumber(Format::SRGB8)]    = tempFeature;
+    _formatFeatures[toNumber(Format::SRGB8_A8)] = tempFeature;
+
+    _formatFeatures[toNumber(Format::R11G11B10F)] = tempFeature;
+    _formatFeatures[toNumber(Format::RGB9E5)]     = tempFeature;
+
+    _formatFeatures[toNumber(Format::DEPTH)]         = tempFeature;
+    _formatFeatures[toNumber(Format::DEPTH_STENCIL)] = tempFeature;
+
+    removeFlags(tempFeature, FormatFeature::SAMPLED_TEXTURE);
+    // _formatFeatures[toNumber(Format::RGB10A2UI)] = completeFeature ^ FormatFeature::SAMPLED_TEXTURE;
+    _formatFeatures[toNumber(Format::RGB10A2UI)] = tempFeature;
+
+    // tempFeature = completeFeature ^ FormatFeature::LINEAR_FILTER | FormatFeature::VERTEX_ATTRIBUTE;
+    tempFeature = completeFeature | FormatFeature::VERTEX_ATTRIBUTE;
+    removeFlags(tempFeature, FormatFeature::LINEAR_FILTER);
+
+    _formatFeatures[toNumber(Format::R16F)]    = tempFeature;
+    _formatFeatures[toNumber(Format::RG16F)]   = tempFeature;
+    _formatFeatures[toNumber(Format::RGB16F)]  = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA16F)] = tempFeature;
+
+    // tempFeature = completeFeature ^ FormatFeature::SAMPLED_TEXTURE ^ FormatFeature::LINEAR_FILTER | FormatFeature::VERTEX_ATTRIBUTE;
+    tempFeature = completeFeature | FormatFeature::VERTEX_ATTRIBUTE;
+    removeFlags(tempFeature, FormatFeature::SAMPLED_TEXTURE & FormatFeature::LINEAR_FILTER);
+
+    _formatFeatures[toNumber(Format::R32F)]    = tempFeature;
+    _formatFeatures[toNumber(Format::RG32F)]   = tempFeature;
+    _formatFeatures[toNumber(Format::RGB32F)]  = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA32F)] = tempFeature;
+
+    // tempFeature = completeFeature ^ FormatFeature::SAMPLED_TEXTURE | FormatFeature::VERTEX_ATTRIBUTE;
+    tempFeature = completeFeature | FormatFeature::VERTEX_ATTRIBUTE;
+    removeFlags(tempFeature, FormatFeature::SAMPLED_TEXTURE);
+
+    _formatFeatures[toNumber(Format::RGB10A2UI)] = completeFeature ^ FormatFeature::SAMPLED_TEXTURE;
+
+    _formatFeatures[toNumber(Format::R8I)]   = tempFeature;
+    _formatFeatures[toNumber(Format::R8UI)]  = tempFeature;
+    _formatFeatures[toNumber(Format::R16I)]  = tempFeature;
+    _formatFeatures[toNumber(Format::R16UI)] = tempFeature;
+    _formatFeatures[toNumber(Format::R32I)]  = tempFeature;
+    _formatFeatures[toNumber(Format::R32UI)] = tempFeature;
+
+    _formatFeatures[toNumber(Format::RG8I)]   = tempFeature;
+    _formatFeatures[toNumber(Format::RG8UI)]  = tempFeature;
+    _formatFeatures[toNumber(Format::RG16I)]  = tempFeature;
+    _formatFeatures[toNumber(Format::RG16UI)] = tempFeature;
+    _formatFeatures[toNumber(Format::RG32I)]  = tempFeature;
+    _formatFeatures[toNumber(Format::RG32UI)] = tempFeature;
+
+    _formatFeatures[toNumber(Format::RGB8I)]   = tempFeature;
+    _formatFeatures[toNumber(Format::RGB8UI)]  = tempFeature;
+    _formatFeatures[toNumber(Format::RGB16I)]  = tempFeature;
+    _formatFeatures[toNumber(Format::RGB16UI)] = tempFeature;
+    _formatFeatures[toNumber(Format::RGB32I)]  = tempFeature;
+    _formatFeatures[toNumber(Format::RGB32UI)] = tempFeature;
+
+    _formatFeatures[toNumber(Format::RGBA8I)]   = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA8UI)]  = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA16I)]  = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA16UI)] = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA32I)]  = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA32UI)] = tempFeature;
+
+    _textureExclusive[toNumber(Format::R8)]     = false;
+    _textureExclusive[toNumber(Format::RG8)]    = false;
+    _textureExclusive[toNumber(Format::RGB8)]   = false;
+    _textureExclusive[toNumber(Format::R5G6B5)] = false;
+    _textureExclusive[toNumber(Format::RGBA4)]  = false;
+
+    _textureExclusive[toNumber(Format::RGB5A1)]    = false;
+    _textureExclusive[toNumber(Format::RGBA8)]     = false;
+    _textureExclusive[toNumber(Format::RGB10A2)]   = false;
+    _textureExclusive[toNumber(Format::RGB10A2UI)] = false;
+    _textureExclusive[toNumber(Format::SRGB8_A8)]  = false;
+
+    _textureExclusive[toNumber(Format::R8I)]   = false;
+    _textureExclusive[toNumber(Format::R8UI)]  = false;
+    _textureExclusive[toNumber(Format::R16I)]  = false;
+    _textureExclusive[toNumber(Format::R16UI)] = false;
+    _textureExclusive[toNumber(Format::R32I)]  = false;
+    _textureExclusive[toNumber(Format::R32UI)] = false;
+
+    _textureExclusive[toNumber(Format::RG8I)]   = false;
+    _textureExclusive[toNumber(Format::RG8UI)]  = false;
+    _textureExclusive[toNumber(Format::RG16I)]  = false;
+    _textureExclusive[toNumber(Format::RG16UI)] = false;
+    _textureExclusive[toNumber(Format::RG32I)]  = false;
+    _textureExclusive[toNumber(Format::RG32UI)] = false;
+
+    _textureExclusive[toNumber(Format::RGBA8I)]   = false;
+    _textureExclusive[toNumber(Format::RGBA8UI)]  = false;
+    _textureExclusive[toNumber(Format::RGBA16I)]  = false;
+    _textureExclusive[toNumber(Format::RGBA16UI)] = false;
+    _textureExclusive[toNumber(Format::RGBA32I)]  = false;
+    _textureExclusive[toNumber(Format::RGBA32UI)] = false;
+
+    _textureExclusive[toNumber(Format::DEPTH)]         = false;
+    _textureExclusive[toNumber(Format::DEPTH_STENCIL)] = false;
+
+    if (checkExtension("render_snorm")) {
+        // https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_render_snorm.txt
+        // For 16, see https://www.khronos.org/registry/OpenGL/extensions/EXT/EXT_texture_norm16.txt
+        _textureExclusive[toNumber(Format::R8SN)]    = false;
+        _textureExclusive[toNumber(Format::RG8SN)]   = false;
+        _textureExclusive[toNumber(Format::RGB8SN)]  = false;
+        _textureExclusive[toNumber(Format::RGBA8SN)] = false;
+    }
+
+    if (checkExtension("color_buffer_float")) {
+        _textureExclusive[toNumber(Format::R32F)]    = false;
+        _textureExclusive[toNumber(Format::RG32F)]   = false;
+        _textureExclusive[toNumber(Format::RGB32F)]  = false;
+        _textureExclusive[toNumber(Format::RGBA32F)] = false;
+    }
+    if (checkExtension("color_buffer_half_float")) {
+        _textureExclusive[toNumber(Format::R16F)]    = false;
+        _textureExclusive[toNumber(Format::RG16F)]   = false;
+        _textureExclusive[toNumber(Format::RGB16F)]  = false;
+        _textureExclusive[toNumber(Format::RGBA16F)] = false;
+    }
+
+    if (checkExtension("texture_float_linear")) {
+        _formatFeatures[toNumber(Format::RGB32F)] |= FormatFeature::LINEAR_FILTER;
+        _formatFeatures[toNumber(Format::RGBA32F)] |= FormatFeature::LINEAR_FILTER;
+        _formatFeatures[toNumber(Format::R32F)] |= FormatFeature::LINEAR_FILTER;
+        _formatFeatures[toNumber(Format::RG32F)] |= FormatFeature::LINEAR_FILTER;
+    }
+
+    if (checkExtension("texture_half_float_linear")) {
+        _formatFeatures[toNumber(Format::RGB16F)] |= FormatFeature::LINEAR_FILTER;
+        _formatFeatures[toNumber(Format::RGBA16F)] |= FormatFeature::LINEAR_FILTER;
+        _formatFeatures[toNumber(Format::R16F)] |= FormatFeature::LINEAR_FILTER;
+        _formatFeatures[toNumber(Format::RG16F)] |= FormatFeature::LINEAR_FILTER;
+    }
+
+    const FormatFeature compressedFeature = FormatFeature::SAMPLED_TEXTURE | FormatFeature::LINEAR_FILTER;
+
+    if (checkExtension("compressed_ETC1")) {
+        _formatFeatures[toNumber(Format::ETC_RGB8)] = compressedFeature;
+    }
+
+    _formatFeatures[toNumber(Format::ETC2_RGB8)]     = compressedFeature;
+    _formatFeatures[toNumber(Format::ETC2_RGBA8)]    = compressedFeature;
+    _formatFeatures[toNumber(Format::ETC2_SRGB8)]    = compressedFeature;
+    _formatFeatures[toNumber(Format::ETC2_SRGB8_A8)] = compressedFeature;
+    _formatFeatures[toNumber(Format::ETC2_RGB8_A1)]  = compressedFeature;
+    _formatFeatures[toNumber(Format::ETC2_SRGB8_A1)] = compressedFeature;
+
+    if (checkExtension("texture_compression_pvrtc")) {
+        _formatFeatures[toNumber(Format::PVRTC_RGB2)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::PVRTC_RGBA2)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::PVRTC_RGB4)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::PVRTC_RGBA4)] |= compressedFeature;
+    }
+
+    if (checkExtension("texture_compression_astc")) {
+        _formatFeatures[toNumber(Format::ASTC_RGBA_4X4)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_5X4)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_5X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_6X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_6X6)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_8X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_8X6)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_8X8)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_10X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_10X6)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_10X8)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_10X10)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_12X10)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_12X12)] |= compressedFeature;
+
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_4X4)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_5X4)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_5X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_6X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_6X6)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_8X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_8X6)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_8X8)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X6)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X8)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X10)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_12X10)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_12X12)] |= compressedFeature;
+    }
 }
 
 CommandBuffer *GLES3Device::createCommandBuffer(const CommandBufferInfo &info, bool hasAgent) {

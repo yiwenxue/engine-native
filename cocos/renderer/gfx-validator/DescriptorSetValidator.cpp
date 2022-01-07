@@ -75,17 +75,22 @@ void DescriptorSetValidator::update() {
 
     Texture *texture = nullptr;
     Sampler *sampler = nullptr;
-    Format format  = {};
+    Format   format  = {};
 
     for (size_t i = 0; i < descriptorCount; ++i) {
         texture = _textures[i];
         sampler = _samplers[i];
+        if (texture == nullptr || sampler == nullptr) continue;
         format  = texture->getInfo().format;
 
         if (sampler->getInfo().magFilter == Filter::LINEAR ||
             sampler->getInfo().mipFilter == Filter::LINEAR ||
             sampler->getInfo().minFilter == Filter::LINEAR) {
-            CCASSERT(hasFlag(DeviceValidator::getInstance()->getFormatFeatures(format), FormatFeature::LINEAR_FILTER), "Texture is not linearly filterable.");
+
+            auto feature = DeviceValidator::getInstance()->getFormatFeatures(format);
+            if (!hasFlag(DeviceValidator::getInstance()->getFormatFeatures(format), FormatFeature::LINEAR_FILTER)) {
+                CC_LOG_DEBUG("[WARNING]: Format doesn't support linear filter.");
+            }
         }
     }
 
@@ -99,7 +104,7 @@ void DescriptorSetValidator::bindBuffer(uint32_t binding, Buffer *buffer, uint32
     CCASSERT(isInited(), "alread destroyed?");
     CCASSERT(buffer && static_cast<BufferValidator *>(buffer)->isInited(), "already destroyed?");
 
-    const vector<uint32_t> &              bindingIndices = _layout->getBindingIndices();
+    const vector<uint32_t>               &bindingIndices = _layout->getBindingIndices();
     const DescriptorSetLayoutBindingList &bindings       = _layout->getBindings();
     CCASSERT(binding < bindingIndices.size() && bindingIndices[binding] < bindings.size(), "Illegal binding");
 
@@ -127,7 +132,7 @@ void DescriptorSetValidator::bindTexture(uint32_t binding, Texture *texture, uin
     CCASSERT(isInited(), "alread destroyed?");
     CCASSERT(texture && static_cast<TextureValidator *>(texture)->isInited(), "already destroyed?");
 
-    const vector<uint32_t> &              bindingIndices = _layout->getBindingIndices();
+    const vector<uint32_t>               &bindingIndices = _layout->getBindingIndices();
     const DescriptorSetLayoutBindingList &bindings       = _layout->getBindings();
     CCASSERT(binding < bindingIndices.size() && bindingIndices[binding] < bindings.size(), "Illegal binding");
 
@@ -152,7 +157,7 @@ void DescriptorSetValidator::bindTexture(uint32_t binding, Texture *texture, uin
 void DescriptorSetValidator::bindSampler(uint32_t binding, Sampler *sampler, uint32_t index) {
     CCASSERT(isInited(), "alread destroyed?");
 
-    const vector<uint32_t> &              bindingIndices = _layout->getBindingIndices();
+    const vector<uint32_t>               &bindingIndices = _layout->getBindingIndices();
     const DescriptorSetLayoutBindingList &bindings       = _layout->getBindings();
     CCASSERT(binding < bindingIndices.size() && bindingIndices[binding] < bindings.size(), "Illegal binding");
 

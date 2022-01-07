@@ -100,41 +100,29 @@ bool CCMTLDevice::doInit(const DeviceInfo &info) {
         _gpuStagingBufferPools[i] = CC_NEW(CCMTLGPUStagingBufferPool(mtlDevice));
     }
 
-    _features[toNumber(Feature::COLOR_FLOAT)]               = mu::isColorBufferFloatSupported(gpuFamily);
-    _features[toNumber(Feature::COLOR_HALF_FLOAT)]          = mu::isColorBufferHalfFloatSupported(gpuFamily);
-    _features[toNumber(Feature::TEXTURE_FLOAT_LINEAR)]      = mu::isLinearTextureSupported(gpuFamily);
-    _features[toNumber(Feature::TEXTURE_HALF_FLOAT_LINEAR)] = mu::isLinearTextureSupported(gpuFamily);
+    initFormatFeatures(gpuFamily);
 
-    String compressedFormats;
+    String              compressedFormats;
+    const FormatFeature compressedFeature = FormatFeature::SAMPLED_TEXTURE | FormatFeature::LINEAR_FILTER;
     if (mu::isPVRTCSuppported(gpuFamily)) {
-        _features[toNumber(Feature::FORMAT_PVRTC)] = true;
         compressedFormats += "pvrtc ";
     }
     if (mu::isEAC_ETCCSuppported(gpuFamily)) {
-        _features[toNumber(Feature::FORMAT_ETC2)] = true;
         compressedFormats += "etc2 ";
     }
     if (mu::isASTCSuppported(gpuFamily)) {
-        _features[toNumber(Feature::FORMAT_ASTC)] = true;
         compressedFormats += "astc ";
     }
     if (mu::isBCSupported(gpuFamily)) {
-        _features[toNumber(Feature::FORMAT_ASTC)] = true;
         compressedFormats += "dxt ";
     }
 
-    _features[toNumber(Feature::TEXTURE_FLOAT)]            = true;
-    _features[toNumber(Feature::TEXTURE_HALF_FLOAT)]       = true;
-    _features[toNumber(Feature::FORMAT_R11G11B10F)]        = true;
-    _features[toNumber(Feature::FORMAT_SRGB)]              = true;
     _features[toNumber(Feature::INSTANCED_ARRAYS)]         = true;
     _features[toNumber(Feature::MULTIPLE_RENDER_TARGETS)]  = true;
     _features[toNumber(Feature::BLEND_MINMAX)]             = true;
     _features[toNumber(Feature::ELEMENT_INDEX_UINT)]       = true;
     _features[toNumber(Feature::COMPUTE_SHADER)]           = true;
     _features[toNumber(Feature::INPUT_ATTACHMENT_BENEFIT)] = true;
-
-    _features[toNumber(Feature::FORMAT_RGB8)] = false;
 
     QueueInfo queueInfo;
     queueInfo.type = QueueType::GRAPHICS;
@@ -164,7 +152,12 @@ void CCMTLDevice::doDestroy() {
     //    }
 
     CC_DELETE(_gpuDeviceObj);
-    
+
+    if (_autoreleasePool) {
+        [(NSAutoreleasePool *)_autoreleasePool drain];
+        _autoreleasePool = nullptr;
+    }
+
     CC_SAFE_DESTROY(_queryPool)
     CC_SAFE_DESTROY(_queue);
     CC_SAFE_DESTROY(_cmdBuff);
@@ -184,9 +177,7 @@ void CCMTLDevice::doDestroy() {
     }
 
     cc::gfx::mu::clearUtilResource();
-    
-    
-    
+
     CCMTLTexture::deleteDefaultTexture();
     CCMTLSampler::deleteDefaultSampler();
 
@@ -242,6 +233,12 @@ void CCMTLDevice::present() {
             onPresentCompleted();
         }];
         [cmdBuffer commit];
+    }
+
+    if (_autoreleasePool) {
+        //        CC_LOG_INFO("POOL: %p RELEASED", _autoreleasePool);
+        [(NSAutoreleasePool *)_autoreleasePool drain];
+        _autoreleasePool = nullptr;
     }
 }
 
@@ -358,6 +355,123 @@ void CCMTLDevice::getQueryPoolResults(QueryPool *queryPool) {
 void CCMTLDevice::onMemoryWarning() {
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
         _gpuStagingBufferPools[i]->shrinkSize();
+    }
+}
+void CCMTLDevice::initFormatFeatures(uint family) {
+    const FormatFeature completeFeature = FormatFeature::RENDER_TARGET | FormatFeature::SAMPLED_TEXTURE | FormatFeature::LINEAR_FILTER | FormatFeature::STORAGE_TEXTURE;
+
+    FormatFeature completeFeature tempFeature = completeFeature & ~FormatFeature::LINEAR_FILTER;
+
+    _formatFeatures[toNumber(Format::R8UI)]    = tempFeature;
+    _formatFeatures[toNumber(Format::RG8UI)]   = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA8UI)] = tempFeature;
+
+    _formatFeatures[toNumber(Format::R16UI)]    = tempFeature;
+    _formatFeatures[toNumber(Format::RG16UI)]   = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA16UI)] = tempFeature;
+
+    _formatFeatures[toNumber(Format::R32F)]    = tempFeature;
+    _formatFeatures[toNumber(Format::RG32F)]   = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA32F)] = tempFeature;
+
+    if (gpuFamily < GPUFamily::Mac1) {
+        _formatFeatures[toNumber(Format::R32UI)]    = tempFeature;
+        _formatFeatures[toNumber(Format::RG32UI)]   = tempFeature;
+        _formatFeatures[toNumber(Format::RGBA32UI)] = tempFeature;
+    } else {
+        _formatFeatures[toNumber(Format::R32UI)]    = completeFeature;
+        _formatFeatures[toNumber(Format::RG32UI)]   = completeFeature;
+        _formatFeatures[toNumber(Format::RGBA32UI)] = completeFeature;
+    }
+
+    if (gpuFamily < GPUFamily::Apple3) {
+        _formatFeatures[toNumber(Format::RGB10A2UI)] = tempFeature & ~FormatFeature::STORAGE_TEXTURE;
+    } else {
+        _formatFeatures[toNumber(Format::RGB10A2UI)] = tempFeature;
+    }
+
+    tempFeature = completeFeature;
+
+    _formatFeatures[toNumber(Format::R8SN)]    = tempFeature;
+    _formatFeatures[toNumber(Format::RG8SN)]   = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA8SN)] = tempFeature;
+
+    _formatFeatures[toNumber(Format::R16SN)]    = tempFeature;
+    _formatFeatures[toNumber(Format::RG16SN)]   = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA16SN)] = tempFeature;
+
+    _formatFeatures[toNumber(Format::R16F)]    = tempFeature;
+    _formatFeatures[toNumber(Format::RG16F)]   = tempFeature;
+    _formatFeatures[toNumber(Format::RGBA16F)] = tempFeature;
+
+    _formatFeatures[toNumber(Format::R11G11B10F)] = tempFeature & ~FormatFeature::STORAGE_TEXTURE;
+    _formatFeatures[toNumber(Format::RGB9E5)]     = tempFeature & ~FormatFeature::STORAGE_TEXTURE;
+
+    if (gpuFamily < GPUFamily::Mac1) {
+        _formatFeatures[toNumber(Format::DEPTH)] = FormatFeature::SAMPLED_TEXTURE;
+        _formatFeatures[toNumber(Format::DEPTH_STENCIL)] = FormatFeature::SAMPLED_TEXTURE;
+    } else {
+        _formatFeatures[toNumber(Format::DEPTH)] = FormatFeature::SAMPLED_TEXTURE | FormatFeature::LINEAR_FILTER;
+        _formatFeatures[toNumber(Format::DEPTH_STENCIL)] = FormatFeature::SAMPLED_TEXTURE | FormatFeature::LINEAR_FILTER;
+    }
+
+
+    const FormatFeature compressedFeature = FormatFeature::SAMPLED_TEXTURE | FormatFeature::LINEAR_FILTER;
+    if (mu::isPVRTCSuppported(gpuFamily)) {
+        _formatFeatures[toNumber(Format::PVRTC_RGB2)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::PVRTC_RGBA2)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::PVRTC_RGB4)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::PVRTC_RGBA4)] |= compressedFeature;
+    }
+    if (mu::isEAC_ETCCSuppported(gpuFamily)) {
+        _formatFeatures[toNumber(Format::ETC2_RGB8)]     = compressedFeature;
+        _formatFeatures[toNumber(Format::ETC2_RGBA8)]    = compressedFeature;
+        _formatFeatures[toNumber(Format::ETC2_SRGB8)]    = compressedFeature;
+        _formatFeatures[toNumber(Format::ETC2_SRGB8_A8)] = compressedFeature;
+        _formatFeatures[toNumber(Format::ETC2_RGB8_A1)]  = compressedFeature;
+        _formatFeatures[toNumber(Format::ETC2_SRGB8_A1)] = compressedFeature;
+    }
+    if (mu::isASTCSuppported(gpuFamily)) {
+        _formatFeatures[toNumber(Format::ASTC_RGBA_4X4)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_5X4)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_5X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_6X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_6X6)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_8X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_8X6)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_8X8)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_10X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_10X6)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_10X8)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_10X10)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_12X10)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_RGBA_12X12)] |= compressedFeature;
+
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_4X4)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_5X4)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_5X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_6X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_6X6)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_8X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_8X6)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_8X8)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X6)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X8)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X10)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_12X10)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_12X12)] |= compressedFeature;
+    }
+
+    if (mu::isBCSupported(gpuFamily)) {
+        _formatFeatures[toNumber(Format.BC1)]            = compressedFeature;
+        _formatFeatures[toNumber(Format.BC1_ALPHA)]      = compressedFeature;
+        _formatFeatures[toNumber(Format.BC1_SRGB)]       = compressedFeature;
+        _formatFeatures[toNumber(Format.BC1_SRGB_ALPHA)] = compressedFeature;
+        _formatFeatures[toNumber(Format.BC2)]            = compressedFeature;
+        _formatFeatures[toNumber(Format.BC2_SRGB)]       = compressedFeature;
+        _formatFeatures[toNumber(Format.BC3)]            = compressedFeature;
+        _formatFeatures[toNumber(Format.BC3_SRGB)]       = compressedFeature;
     }
 }
 

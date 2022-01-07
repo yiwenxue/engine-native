@@ -150,7 +150,7 @@ bool DeferredPipeline::activeRenderer(gfx::Swapchain *swapchain) {
 
     // update global defines when all states initialized.
     _macros.setValue("CC_USE_HDR", static_cast<bool>(sharedData->isHDR));
-    _macros.setValue("CC_SUPPORT_FLOAT_TEXTURE", (_device->getFormatFeatures(gfx::Format::RGBA32F) & gfx::FormatFeature::RENDER_TARGET) != gfx::FormatFeature::NONE);
+    _macros.setValue("CC_SUPPORT_FLOAT_TEXTURE", (_device->getFormatFeatures(gfx::Format::RGBA32F) & (gfx::FormatFeature::RENDER_TARGET | gfx::FormatFeature::SAMPLED_TEXTURE)) != gfx::FormatFeature::NONE);
 
     // step 2 create index buffer
     uint ibStride = 4;

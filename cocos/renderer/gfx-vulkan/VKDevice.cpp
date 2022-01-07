@@ -100,8 +100,6 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
     //const VkPhysicalDeviceVulkan11Features &deviceVulkan11Features = _gpuContext->physicalDeviceVulkan11Features;
     //const VkPhysicalDeviceVulkan12Features &deviceVulkan12Features = _gpuContext->physicalDeviceVulkan12Features;
 
-    _textureExclusive.fill(true);
-
     ///////////////////// Device Creation /////////////////////
 
     _gpuDevice               = CC_NEW(CCVKGPUDevice);
@@ -158,6 +156,7 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
             _extensions.push_back(extension);
         }
     }
+
 
     // prepare the device queues
     uint32_t                        queueFamilyPropertiesCount = utils::toUint(_gpuContext->queueFamilyProperties.size());
@@ -238,61 +237,23 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
     _features[toNumber(Feature::COMPUTE_SHADER)]           = true;
     _features[toNumber(Feature::INPUT_ATTACHMENT_BENEFIT)] = true;
 
-    const auto           formatLen     = static_cast<size_t>(Format::COUNT);
-    VkFormatProperties   properties    = {};
-    VkFormat             format        = {};
-    VkFormatFeatureFlags formatFeature = {};
-    for (int i = 0; i < formatLen; ++i) {
-        format = mapVkFormat(static_cast<Format>(i), _gpuDevice);
-        vkGetPhysicalDeviceFormatProperties(_gpuContext->physicalDevice, format, &properties);
-
-        // render buffer support
-        formatFeature = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
-        if (properties.optimalTilingFeatures & formatFeature) {
-            _formatFeatures[i] |= FormatFeature::RENDER_TARGET;
-            setTextureExclusive(static_cast<Format>(i), false);
-        }
-        // texture storage support
-        formatFeature = VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT;
-        if (properties.linearTilingFeatures & formatFeature) {
-            _formatFeatures[i] |= FormatFeature::STORAGE_TEXTURE & FormatFeature::RENDER_TARGET;
-        }
-        // sampled render target support
-        formatFeature = VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT;
-        if (properties.optimalTilingFeatures & formatFeature) {
-            _formatFeatures[i] |= FormatFeature::SAMPLED_TEXTURE & FormatFeature::RENDER_TARGET;
-        }
-        // linear filter support
-        formatFeature = VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT;
-        if (properties.optimalTilingFeatures & formatFeature) {
-            _formatFeatures[i] |= FormatFeature::LINEAR_FILTER;
-        }
-        // vertex attribute support
-        formatFeature = VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT;
-        if (properties.bufferFeatures & formatFeature) {
-            _formatFeatures[i] |= FormatFeature::VERTEX_ATTRIBUTE;
-        }
-    }
+    initFormatFeature();
 
     String compressedFmts;
 
-    if ((_formatFeatures[toNumber(Format::BC1_SRGB_ALPHA)] & FormatFeature::RENDER_TARGET) != FormatFeature::NONE) {
+    if ((_formatFeatures[toNumber(Format::BC1_SRGB_ALPHA)] & FormatFeature::SAMPLED_TEXTURE) != FormatFeature::NONE) {
         compressedFmts += "dxt ";
     }
 
-    if ((_formatFeatures[toNumber(Format::ETC_RGB8)] & FormatFeature::RENDER_TARGET) != FormatFeature::NONE) {
-        compressedFmts += "etc ";
-    }
-
-    if ((_formatFeatures[toNumber(Format::ETC2_RGBA8)] & FormatFeature::RENDER_TARGET) != FormatFeature::NONE) {
+    if ((_formatFeatures[toNumber(Format::ETC2_RGBA8)] & FormatFeature::SAMPLED_TEXTURE) != FormatFeature::NONE) {
         compressedFmts += "etc2 ";
     }
 
-    if ((_formatFeatures[toNumber(Format::ASTC_RGBA_4X4)] & FormatFeature::RENDER_TARGET) != FormatFeature::NONE) {
+    if ((_formatFeatures[toNumber(Format::ASTC_RGBA_4X4)] & FormatFeature::SAMPLED_TEXTURE) != FormatFeature::NONE) {
         compressedFmts += "astc ";
     }
 
-    if ((_formatFeatures[toNumber(Format::PVRTC_RGBA2)] & FormatFeature::RENDER_TARGET) != FormatFeature::NONE) {
+    if ((_formatFeatures[toNumber(Format::PVRTC_RGBA2)] & FormatFeature::SAMPLED_TEXTURE) != FormatFeature::NONE) {
         compressedFmts += "pvrtc ";
     }
 
@@ -716,6 +677,47 @@ void CCVKDevice::waitAllFences() {
 
         for (auto *fencePool : _gpuFencePools) {
             fencePool->reset();
+        }
+    }
+}
+
+void CCVKDevice::initFormatFeature() {
+    _textureExclusive.fill(true);
+
+    const auto           formatLen     = static_cast<size_t>(Format::COUNT);
+    VkFormatProperties   properties    = {};
+    VkFormat             format        = {};
+    VkFormatFeatureFlags formatFeature = {};
+    for (int i = toNumber(Format::R8); i < formatLen; ++i) {
+        if (static_cast<Format>(i) == Format::ETC_RGB8) continue;
+        format = mapVkFormat(static_cast<Format>(i), _gpuDevice);
+        vkGetPhysicalDeviceFormatProperties(_gpuContext->physicalDevice, format, &properties);
+
+        // render buffer support
+        formatFeature = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT | VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        if (properties.optimalTilingFeatures & formatFeature) {
+            _formatFeatures[i] |= FormatFeature::RENDER_TARGET;
+            _textureExclusive[i] = false;
+        }
+        // texture storage support
+        formatFeature = VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT;
+        if (properties.linearTilingFeatures & formatFeature) {
+            _formatFeatures[i] |= FormatFeature::STORAGE_TEXTURE;
+        }
+        // sampled render target support
+        formatFeature = VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT;
+        if (properties.optimalTilingFeatures & formatFeature) {
+            _formatFeatures[i] |= FormatFeature::SAMPLED_TEXTURE;
+        }
+        // linear filter support
+        formatFeature = VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT;
+        if (properties.optimalTilingFeatures & formatFeature) {
+            _formatFeatures[i] |= FormatFeature::LINEAR_FILTER;
+        }
+        // vertex attribute support
+        formatFeature = VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT;
+        if (properties.bufferFeatures & formatFeature) {
+            _formatFeatures[i] |= FormatFeature::VERTEX_ATTRIBUTE;
         }
     }
 }

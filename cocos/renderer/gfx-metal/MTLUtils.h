@@ -92,6 +92,7 @@ bool isBCSupported(uint family);
 bool isColorBufferFloatSupported(uint family);
 bool isColorBufferHalfFloatSupported(uint family);
 bool isLinearTextureSupported(uint family);
+bool isSizedUnormSupported(uint family);
 bool isIndirectCommandBufferSupported(MTLFeatureSet featureSet);
 bool isDepthStencilFormatSupported(id<MTLDevice> device, Format format, uint family);
 MTLPixelFormat getSupportedDepthStencilFormat(id<MTLDevice> device, uint family, uint &depthBits);

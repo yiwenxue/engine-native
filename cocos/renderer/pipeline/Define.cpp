@@ -506,14 +506,12 @@ uint nextPow2(uint val) {
     return val;
 }
 
-bool supportsHalfFloatTexture(gfx::Device *device) {
-    return (device->getFormatFeatures(gfx::Format::RGBA16F) & gfx::FormatFeature::RENDER_TARGET) != gfx::FormatFeature::NONE &&
-           device->getGfxAPI() != gfx::API::GLES2;
+bool supportsR16HalfFloatTexture(gfx::Device *device) {
+    return (device->getFormatFeatures(gfx::Format::R16F) & (gfx::FormatFeature::RENDER_TARGET | gfx::FormatFeature::SAMPLED_TEXTURE)) != gfx::FormatFeature::NONE;
 }
 
-bool supportsFloatTexture(gfx::Device *device) {
-    return (device->getFormatFeatures(gfx::Format::RGBA32F) & gfx::FormatFeature::RENDER_TARGET) != gfx::FormatFeature::NONE &&
-           device->getGfxAPI() != gfx::API::GLES2;
+bool supportsR32FloatTexture(gfx::Device *device) {
+    return (device->getFormatFeatures(gfx::Format::R32F) & (gfx::FormatFeature::RENDER_TARGET | gfx::FormatFeature::SAMPLED_TEXTURE)) != gfx::FormatFeature::NONE;
 }
 
 uint getPhaseID(const String &phase) {
