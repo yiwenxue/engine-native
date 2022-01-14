@@ -80,7 +80,7 @@ public:
         });
     }
 
-    inline bool checkTextureExclusive(const Format &format) { return _textureExclusive[static_cast<size_t>(format)]; };
+    inline bool isTextureExclusive(const Format &format) { return _textureExclusive[static_cast<size_t>(format)]; };
 
 protected:
     static GLES3Device *instance;

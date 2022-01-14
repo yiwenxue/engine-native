@@ -95,8 +95,6 @@ public:
     inline CCVKGPUFramebufferHub *  gpuFramebufferHub() { return _gpuFramebufferHub; }
     inline CCVKGPUDescriptorSetHub *gpuDescriptorSetHub() { return _gpuDescriptorSetHub; }
 
-    inline bool checkTextureExclusive(const Format &format) { return _textureExclusive[static_cast<size_t>(format)]; };
-
     CCVKGPUFencePool *        gpuFencePool();
     CCVKGPURecycleBin *       gpuRecycleBin();
     CCVKGPUStagingBufferPool *gpuStagingBufferPool();
@@ -154,8 +152,6 @@ protected:
 
     vector<const char *> _layers;
     vector<const char *> _extensions;
-
-    std::array<bool, static_cast<size_t>(Format::COUNT)> _textureExclusive;
 };
 
 } // namespace gfx

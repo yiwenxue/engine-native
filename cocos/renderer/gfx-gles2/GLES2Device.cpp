@@ -304,7 +304,6 @@ void GLES2Device::initFormatFeature() {
         _textureExclusive[toNumber(Format::SRGB8_A8)] = false;
     }
 
-
     if (checkExtension("texture_rg")) {
         _formatFeatures[toNumber(Format::R8)] |= completeFeature;
         _formatFeatures[toNumber(Format::RG8)] |= completeFeature;
@@ -395,22 +394,21 @@ void GLES2Device::initFormatFeature() {
         _formatFeatures[toNumber(Format::ASTC_RGBA_10X10)] |= compressedFeature;
         _formatFeatures[toNumber(Format::ASTC_RGBA_12X10)] |= compressedFeature;
         _formatFeatures[toNumber(Format::ASTC_RGBA_12X12)] |= compressedFeature;
-        if (checkExtension("EXT_sRGB")) {
-            _formatFeatures[toNumber(Format::ASTC_SRGBA_4X4)] |= compressedFeature;
-            _formatFeatures[toNumber(Format::ASTC_SRGBA_5X4)] |= compressedFeature;
-            _formatFeatures[toNumber(Format::ASTC_SRGBA_5X5)] |= compressedFeature;
-            _formatFeatures[toNumber(Format::ASTC_SRGBA_6X5)] |= compressedFeature;
-            _formatFeatures[toNumber(Format::ASTC_SRGBA_6X6)] |= compressedFeature;
-            _formatFeatures[toNumber(Format::ASTC_SRGBA_8X5)] |= compressedFeature;
-            _formatFeatures[toNumber(Format::ASTC_SRGBA_8X6)] |= compressedFeature;
-            _formatFeatures[toNumber(Format::ASTC_SRGBA_8X8)] |= compressedFeature;
-            _formatFeatures[toNumber(Format::ASTC_SRGBA_10X5)] |= compressedFeature;
-            _formatFeatures[toNumber(Format::ASTC_SRGBA_10X6)] |= compressedFeature;
-            _formatFeatures[toNumber(Format::ASTC_SRGBA_10X8)] |= compressedFeature;
-            _formatFeatures[toNumber(Format::ASTC_SRGBA_10X10)] |= compressedFeature;
-            _formatFeatures[toNumber(Format::ASTC_SRGBA_12X10)] |= compressedFeature;
-            _formatFeatures[toNumber(Format::ASTC_SRGBA_12X12)] |= compressedFeature;
-        }
+
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_4X4)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_5X4)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_5X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_6X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_6X6)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_8X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_8X6)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_8X8)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X5)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X6)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X8)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_10X10)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_12X10)] |= compressedFeature;
+        _formatFeatures[toNumber(Format::ASTC_SRGBA_12X12)] |= compressedFeature;
     }
 }
 

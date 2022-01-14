@@ -40,13 +40,11 @@
 #include "VKSwapchain.h"
 #include "VKTexture.h"
 #include "VKUtils.h"
-#include "gfx-base/GFXDef-common.h"
 #include "states/VKGlobalBarrier.h"
 #include "states/VKSampler.h"
 #include "states/VKTextureBarrier.h"
 
 #include "gfx-base/SPIRVUtils.h"
-#include "vulkan/vulkan_core.h"
 
 CC_DISABLE_WARNINGS()
 #define VMA_IMPLEMENTATION

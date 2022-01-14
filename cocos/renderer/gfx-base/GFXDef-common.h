@@ -262,11 +262,11 @@ enum class Format : uint32_t {
 
     // Ericsson Texture Compression Format
     ETC_RGB8,
-    ETC2_RGB8, // exists
+    ETC2_RGB8,
     ETC2_SRGB8,
     ETC2_RGB8_A1,
     ETC2_SRGB8_A1,
-    ETC2_RGBA8, // exists
+    ETC2_RGBA8,
     ETC2_SRGB8_A8,
     EAC_R11,
     EAC_R11SN,
@@ -458,11 +458,11 @@ CC_ENUM_BITWISE_OPERATORS(TextureFlagBit);
 
 enum class FormatFeatureBit : uint32_t {
     NONE             = 0,
-    RENDER_TARGET    = 0x1,  // Texture or renderBuffer
-    SAMPLED_TEXTURE  = 0x2,  // allow shaders to read a texture through a sampler
-    LINEAR_FILTER    = 0x4,  // allow using linear filter and copy from texture to texture linearly
-    STORAGE_TEXTURE  = 0x8,  // allow performing texture reads without sampling and store to arbitrary positions in shaders
-    VERTEX_ATTRIBUTE = 0x10, // use this format as vertex inputs
+    RENDER_TARGET    = 0x1,  // Allow usages as render pass attachments
+    SAMPLED_TEXTURE  = 0x2,  // Allow sampled reads in shaders
+    LINEAR_FILTER    = 0x4,  // Allow linear filtering when sampling in shaders or bliting
+    STORAGE_TEXTURE  = 0x8,  // Allow storage reads & writes in shaders
+    VERTEX_ATTRIBUTE = 0x10, // Allow usages as vertex input attributes
 };
 using FormatFeature = FormatFeatureBit;
 CC_ENUM_BITWISE_OPERATORS(FormatFeatureBit);

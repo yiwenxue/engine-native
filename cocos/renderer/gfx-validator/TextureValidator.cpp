@@ -26,9 +26,10 @@
 #include "base/CoreStd.h"
 
 #include "DeviceValidator.h"
-#include "TextureValidator.h"
 #include "SwapchainValidator.h"
+#include "TextureValidator.h"
 #include "ValidationUtils.h"
+
 
 namespace cc {
 namespace gfx {
@@ -36,13 +37,12 @@ namespace gfx {
 namespace {
 struct EnumHasher final {
     template <typename T, typename Enable = std::enable_if_t<std::is_enum<T>::value>>
-    size_t operator()(const T& v) const {
+    size_t operator()(const T &v) const {
         return static_cast<size_t>(v);
     }
 };
 
-unordered_map<Format, Feature, EnumHasher> featureCheckMap{
-};
+unordered_map<Format, Feature, EnumHasher> featureCheckMap{};
 } // namespace
 
 TextureValidator::TextureValidator(Texture *actor)
@@ -61,11 +61,14 @@ void TextureValidator::doInit(const TextureInfo &info) {
 
     CCASSERT(info.width && info.height && info.depth, "zero-sized texture?");
 
-    FormatFeature ff = FormatFeature::RENDER_TARGET;
-    if (info.usage == TextureUsage::SAMPLED) ff |= FormatFeature::SAMPLED_TEXTURE;
-    if (info.usage == TextureUsage::STORAGE) ff |= FormatFeature::STORAGE_TEXTURE;
+    FormatFeature ff = FormatFeature::NONE;
+    if (hasAnyFlags(info.usage, TextureUsage::COLOR_ATTACHMENT | TextureUsage::DEPTH_STENCIL_ATTACHMENT)) ff |= FormatFeature::RENDER_TARGET;
+    if (hasAnyFlags(info.usage, TextureUsage::SAMPLED)) ff |= FormatFeature::SAMPLED_TEXTURE;
+    if (hasAnyFlags(info.usage, TextureUsage::STORAGE)) ff |= FormatFeature::STORAGE_TEXTURE;
+    if (ff != FormatFeature::NONE) {
+        CCASSERT(hasAllFlags(DeviceValidator::getInstance()->getFormatFeatures(info.format), ff), "Format not supported for the specified features");
+    }
 
-    CCASSERT(hasAllFlags(DeviceValidator::getInstance()->getFormatFeatures(info.format), ff), "Format not supported for the specified features");
     /////////// execute ///////////
 
     _actor->initialize(info);
@@ -74,7 +77,7 @@ void TextureValidator::doInit(const TextureInfo &info) {
 void TextureValidator::doInit(const TextureViewInfo &info) {
     CCASSERT(!isInited(), "initializing twice?");
     _inited = true;
-    CCASSERT(info.texture && static_cast<TextureValidator*>(info.texture)->isInited(), "alread destroyed?");
+    CCASSERT(info.texture && static_cast<TextureValidator *>(info.texture)->isInited(), "alread destroyed?");
 
     /////////// execute ///////////
 
@@ -88,7 +91,7 @@ void TextureValidator::doInit(const SwapchainTextureInfo &info) {
     CCASSERT(!isInited(), "initializing twice?");
     _inited = true;
     CC_UNUSED_PARAM(info); // workaround tidy issue
-    CCASSERT(info.swapchain && static_cast<SwapchainValidator*>(info.swapchain)->isInited(), "alread destroyed?");
+    CCASSERT(info.swapchain && static_cast<SwapchainValidator *>(info.swapchain)->isInited(), "alread destroyed?");
 
     // the actor is already initialized
 }

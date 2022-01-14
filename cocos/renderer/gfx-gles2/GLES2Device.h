@@ -80,7 +80,8 @@ public:
         });
     }
 
-    inline bool checkTextureExclusive(const Format &format) { return _textureExclusive[static_cast<size_t>(format)]; };
+    // check the specified format is texture-exclusive (no renderbuffers allowed)
+    inline bool isTextureExclusive(const Format &format) { return _textureExclusive[static_cast<size_t>(format)]; };
 
 protected:
     static GLES2Device *instance;

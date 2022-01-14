@@ -79,7 +79,6 @@ public:
     inline CCMTLGPUStagingBufferPool *gpuStagingBufferPool() const { return _gpuStagingBufferPools[_currentFrameIndex]; }
     inline bool                       isSamplerDescriptorCompareFunctionSupported() const { return _isSamplerDescriptorCompareFunctionSupported; }
     inline uint                       currentFrameIndex() const { return _currentFrameIndex; }
-    inline bool                       checkTextureExclusive(const Format &format) { return _textureExclusive[static_cast<size_t>(format)]; };
 
     inline void registerSwapchain(CCMTLSwapchain *swapchain) { _swapchains.push_back(swapchain); }
     inline void unRegisterSwapchain(CCMTLSwapchain *swapchain) {
@@ -134,8 +133,6 @@ protected:
     CC_UNUSED uint32_t         _memoryAlarmListenerId                       = 0;
 
     std::vector<CCMTLSwapchain *> _swapchains;
-
-    std::array<bool, static_cast<size_t>(Format::COUNT)> _textureExclusive;
 
     CCMTLGPUDeviceObject *_gpuDeviceObj = nullptr;
 };

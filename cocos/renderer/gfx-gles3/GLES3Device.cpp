@@ -99,7 +99,6 @@ bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
         _features[toNumber(Feature::COMPUTE_SHADER)] = true;
     }
 
-
     String fbfLevelStr = "NONE";
     // PVRVFrame has issues on their support
 #if CC_PLATFORM != CC_PLATFORM_WINDOWS
@@ -260,18 +259,17 @@ void GLES3Device::bindContext(bool bound) {
 void GLES3Device::initFormatFeature() {
     _textureExclusive.fill(true);
 
-    const FormatFeature completeFeature = FormatFeature::RENDER_TARGET | FormatFeature::SAMPLED_TEXTURE | FormatFeature::LINEAR_FILTER | FormatFeature::STORAGE_TEXTURE;
-    FormatFeature       tempFeature     = completeFeature;
+    FormatFeature tempFeature = {};
 
     // builtin
-    tempFeature = completeFeature | FormatFeature::VERTEX_ATTRIBUTE;
+    tempFeature = FormatFeature::RENDER_TARGET | FormatFeature::SAMPLED_TEXTURE | FormatFeature::LINEAR_FILTER | FormatFeature::STORAGE_TEXTURE | FormatFeature::VERTEX_ATTRIBUTE;
 
     _formatFeatures[toNumber(Format::R8)]    = tempFeature;
     _formatFeatures[toNumber(Format::RG8)]   = tempFeature;
     _formatFeatures[toNumber(Format::RGB8)]  = tempFeature;
     _formatFeatures[toNumber(Format::RGBA8)] = tempFeature;
 
-    tempFeature = completeFeature;
+    tempFeature = FormatFeature::RENDER_TARGET | FormatFeature::SAMPLED_TEXTURE | FormatFeature::LINEAR_FILTER | FormatFeature::STORAGE_TEXTURE;
 
     _formatFeatures[toNumber(Format::R8SN)]    = tempFeature;
     _formatFeatures[toNumber(Format::RG8SN)]   = tempFeature;
@@ -291,33 +289,27 @@ void GLES3Device::initFormatFeature() {
     _formatFeatures[toNumber(Format::DEPTH)]         = tempFeature;
     _formatFeatures[toNumber(Format::DEPTH_STENCIL)] = tempFeature;
 
-    removeFlags(tempFeature, FormatFeature::SAMPLED_TEXTURE);
-    // _formatFeatures[toNumber(Format::RGB10A2UI)] = completeFeature ^ FormatFeature::SAMPLED_TEXTURE;
+    tempFeature = FormatFeature::RENDER_TARGET | FormatFeature::LINEAR_FILTER | FormatFeature::STORAGE_TEXTURE;
+
     _formatFeatures[toNumber(Format::RGB10A2UI)] = tempFeature;
 
-    // tempFeature = completeFeature ^ FormatFeature::LINEAR_FILTER | FormatFeature::VERTEX_ATTRIBUTE;
-    tempFeature = completeFeature | FormatFeature::VERTEX_ATTRIBUTE;
-    removeFlags(tempFeature, FormatFeature::LINEAR_FILTER);
+    tempFeature = FormatFeature::RENDER_TARGET | FormatFeature::SAMPLED_TEXTURE | FormatFeature::STORAGE_TEXTURE | FormatFeature::VERTEX_ATTRIBUTE;
 
     _formatFeatures[toNumber(Format::R16F)]    = tempFeature;
     _formatFeatures[toNumber(Format::RG16F)]   = tempFeature;
     _formatFeatures[toNumber(Format::RGB16F)]  = tempFeature;
     _formatFeatures[toNumber(Format::RGBA16F)] = tempFeature;
 
-    // tempFeature = completeFeature ^ FormatFeature::SAMPLED_TEXTURE ^ FormatFeature::LINEAR_FILTER | FormatFeature::VERTEX_ATTRIBUTE;
-    tempFeature = completeFeature | FormatFeature::VERTEX_ATTRIBUTE;
-    removeFlags(tempFeature, FormatFeature::SAMPLED_TEXTURE & FormatFeature::LINEAR_FILTER);
+    tempFeature = FormatFeature::RENDER_TARGET | FormatFeature::STORAGE_TEXTURE | FormatFeature::VERTEX_ATTRIBUTE;
 
     _formatFeatures[toNumber(Format::R32F)]    = tempFeature;
     _formatFeatures[toNumber(Format::RG32F)]   = tempFeature;
     _formatFeatures[toNumber(Format::RGB32F)]  = tempFeature;
     _formatFeatures[toNumber(Format::RGBA32F)] = tempFeature;
 
-    // tempFeature = completeFeature ^ FormatFeature::SAMPLED_TEXTURE | FormatFeature::VERTEX_ATTRIBUTE;
-    tempFeature = completeFeature | FormatFeature::VERTEX_ATTRIBUTE;
-    removeFlags(tempFeature, FormatFeature::SAMPLED_TEXTURE);
+    _formatFeatures[toNumber(Format::RGB10A2UI)] = FormatFeature::RENDER_TARGET | FormatFeature::LINEAR_FILTER | FormatFeature::STORAGE_TEXTURE;
 
-    _formatFeatures[toNumber(Format::RGB10A2UI)] = completeFeature ^ FormatFeature::SAMPLED_TEXTURE;
+    tempFeature = FormatFeature::RENDER_TARGET | FormatFeature::LINEAR_FILTER | FormatFeature::STORAGE_TEXTURE | FormatFeature::VERTEX_ATTRIBUTE;
 
     _formatFeatures[toNumber(Format::R8I)]   = tempFeature;
     _formatFeatures[toNumber(Format::R8UI)]  = tempFeature;
