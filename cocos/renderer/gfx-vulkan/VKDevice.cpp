@@ -680,7 +680,6 @@ void CCVKDevice::waitAllFences() {
 }
 
 void CCVKDevice::initFormatFeature() {
-    _textureExclusive.fill(true);
 
     const auto           formatLen     = static_cast<size_t>(Format::COUNT);
     VkFormatProperties   properties    = {};
@@ -695,7 +694,6 @@ void CCVKDevice::initFormatFeature() {
         formatFeature = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT | VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
         if (properties.optimalTilingFeatures & formatFeature) {
             _formatFeatures[i] |= FormatFeature::RENDER_TARGET;
-            _textureExclusive[i] = false;
         }
         // texture storage support
         formatFeature = VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT;
