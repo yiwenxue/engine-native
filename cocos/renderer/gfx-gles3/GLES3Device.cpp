@@ -289,10 +289,6 @@ void GLES3Device::initFormatFeature() {
     _formatFeatures[toNumber(Format::DEPTH)]         = tempFeature;
     _formatFeatures[toNumber(Format::DEPTH_STENCIL)] = tempFeature;
 
-    tempFeature = FormatFeature::RENDER_TARGET | FormatFeature::LINEAR_FILTER | FormatFeature::STORAGE_TEXTURE;
-
-    _formatFeatures[toNumber(Format::RGB10A2UI)] = tempFeature;
-
     tempFeature = FormatFeature::RENDER_TARGET | FormatFeature::SAMPLED_TEXTURE | FormatFeature::STORAGE_TEXTURE | FormatFeature::VERTEX_ATTRIBUTE;
 
     _formatFeatures[toNumber(Format::R16F)]    = tempFeature;

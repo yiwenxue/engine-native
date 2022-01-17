@@ -295,7 +295,10 @@ void GLES2Device::initFormatFeature() {
         _formatFeatures[toNumber(Format::RGBA16F)] = FormatFeature::VERTEX_ATTRIBUTE;
     }
 
-    _textureExclusive[toNumber(Format::DEPTH)]         = false;
+    _formatFeatures[toNumber(Format::DEPTH)]   = FormatFeature::RENDER_TARGET;
+    _textureExclusive[toNumber(Format::DEPTH)] = false;
+
+    _formatFeatures[toNumber(Format::DEPTH_STENCIL)]   = FormatFeature::RENDER_TARGET;
     _textureExclusive[toNumber(Format::DEPTH_STENCIL)] = false;
 
     if (checkExtension("EXT_sRGB")) {
