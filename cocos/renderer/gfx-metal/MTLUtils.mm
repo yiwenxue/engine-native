@@ -1392,7 +1392,7 @@ bool mu::isLinearTextureSupported(uint family) {
     }
 }
 
-bool mu::isSizedUnormSupported(uint family) {
+bool mu::isUISamplerSupported(uint family) {
     switch (static_cast<GPUFamily>(family)) {
         case GPUFamily::Apple1:
         case GPUFamily::Apple2:
@@ -1400,10 +1400,40 @@ bool mu::isSizedUnormSupported(uint family) {
         case GPUFamily::Apple4:
         case GPUFamily::Apple5:
         case GPUFamily::Apple6:
-            return true;
+            return false;
         case GPUFamily::Mac1:
         case GPUFamily::Mac2:
+            return true;
+    }
+}
+
+bool mu::isRGB10A2UIStorageSupported(uint family) {
+    switch (static_cast<GPUFamily>(family)) {
+        case GPUFamily::Apple1:
+        case GPUFamily::Apple2:
             return false;
+        case GPUFamily::Apple3:
+        case GPUFamily::Apple4:
+        case GPUFamily::Apple5:
+        case GPUFamily::Apple6:
+        case GPUFamily::Mac1:
+        case GPUFamily::Mac2:
+            return true;
+    }
+}
+
+bool mu::isDDepthStencilFilterSupported(uint family) {
+    switch (static_cast<GPUFamily>(family)) {
+        case GPUFamily::Apple1:
+        case GPUFamily::Apple2:
+        case GPUFamily::Apple3:
+        case GPUFamily::Apple4:
+        case GPUFamily::Apple5:
+        case GPUFamily::Apple6:
+            return false;
+        case GPUFamily::Mac1:
+        case GPUFamily::Mac2:
+            return true;
     }
 }
 
