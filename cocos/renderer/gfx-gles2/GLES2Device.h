@@ -28,6 +28,7 @@
 #include "GLES2Std.h"
 #include "gfx-base/GFXDevice.h"
 #include "gfx-base/GFXSwapchain.h"
+#include "gfx-gles-common/GLESCommandPool.h"
 
 namespace cc {
 namespace gfx {
@@ -66,6 +67,8 @@ public:
 
     void acquire(Swapchain *const *swapchains, uint32_t count) override;
     void present() override;
+
+    inline const GLESBindingMapping &bindingMappings() const { return _bindingMappings; }
 
     inline GLES2GPUContext *            context() const { return _gpuContext; }
     inline GLES2GPUStateCache *         stateCache() const { return _gpuStateCache; }
@@ -127,6 +130,8 @@ protected:
     vector<GLES2GPUSwapchain *> _swapchains;
 
     std::array<bool, static_cast<size_t>(Format::COUNT)> _textureExclusive;
+
+    GLESBindingMapping _bindingMappings;
 
     StringArray _extensions;
 };

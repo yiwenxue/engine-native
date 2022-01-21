@@ -927,7 +927,6 @@ String mu::spirv2MSL(const uint32_t *ir, size_t word_count,
     // TODO: bindings from shader just kind of validation, cannot be directly input
     // Get all uniform buffers in the shader.
     uint maxBufferBindingIndex = device->getMaximumBufferBindingIndex();
-    const auto &bufferBindingOffset = device->bindingMappingInfo().bufferOffsets;
     for (const auto &ubo : resources.uniform_buffers) {
         auto set = msl.get_decoration(ubo.id, spv::DecorationDescriptorSet);
         auto binding = msl.get_decoration(ubo.id, spv::DecorationBinding);
@@ -991,10 +990,7 @@ String mu::spirv2MSL(const uint32_t *ir, size_t word_count,
         CC_LOG_ERROR("Implementation limits: Should not use more than %d entries in the sampler state argument table", device->getMaximumSamplerUnits());
         return "";
     }
-
-    // Get all sampled images in the shader.
-    const auto &samplerBindingOffset = device->bindingMappingInfo().samplerOffsets;
-
+    
     // avoid conflict index with input attachments.
     const uint8_t rtOffsets = executionModel == spv::ExecutionModelFragment ? resources.subpass_inputs.size() : 0;
     for (const auto &sampler : resources.sampled_images) {
