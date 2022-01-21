@@ -104,17 +104,20 @@ bool CCMTLDevice::doInit(const DeviceInfo &info) {
 
     String compressedFormats;
 
-    if (mu::isPVRTCSuppported(gpuFamily)) {
-        compressedFormats += "pvrtc ";
+    if (getFormatFeatures(Format::BC1_SRGB_ALPHA) != FormatFeature::NONE) {
+        compressedFormats += "dxt ";
     }
-    if (mu::isEAC_ETCCSuppported(gpuFamily)) {
+
+    if (getFormatFeatures(Format::ETC2_RGBA8) != FormatFeature::NONE) {
         compressedFormats += "etc2 ";
     }
-    if (mu::isASTCSuppported(gpuFamily)) {
+
+    if (getFormatFeatures(Format::ASTC_RGBA_4X4) != FormatFeature::NONE) {
         compressedFormats += "astc ";
     }
-    if (mu::isBCSupported(gpuFamily)) {
-        compressedFormats += "dxt ";
+
+    if (getFormatFeatures(Format::PVRTC_RGBA2) != FormatFeature::NONE) {
+        compressedFormats += "pvrtc ";
     }
 
     _features[toNumber(Feature::INSTANCED_ARRAYS)]         = true;

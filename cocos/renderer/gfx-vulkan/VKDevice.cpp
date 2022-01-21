@@ -155,7 +155,6 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
         }
     }
 
-
     // prepare the device queues
     uint32_t                        queueFamilyPropertiesCount = utils::toUint(_gpuContext->queueFamilyProperties.size());
     vector<VkDeviceQueueCreateInfo> queueCreateInfos(queueFamilyPropertiesCount, {VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO});
@@ -239,19 +238,19 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
 
     String compressedFmts;
 
-    if ((_formatFeatures[toNumber(Format::BC1_SRGB_ALPHA)] & FormatFeature::SAMPLED_TEXTURE) != FormatFeature::NONE) {
+    if (getFormatFeatures(Format::BC1_SRGB_ALPHA) != FormatFeature::NONE) {
         compressedFmts += "dxt ";
     }
 
-    if ((_formatFeatures[toNumber(Format::ETC2_RGBA8)] & FormatFeature::SAMPLED_TEXTURE) != FormatFeature::NONE) {
+    if (getFormatFeatures(Format::ETC2_RGBA8) != FormatFeature::NONE) {
         compressedFmts += "etc2 ";
     }
 
-    if ((_formatFeatures[toNumber(Format::ASTC_RGBA_4X4)] & FormatFeature::SAMPLED_TEXTURE) != FormatFeature::NONE) {
+    if (getFormatFeatures(Format::ASTC_RGBA_4X4) != FormatFeature::NONE) {
         compressedFmts += "astc ";
     }
 
-    if ((_formatFeatures[toNumber(Format::PVRTC_RGBA2)] & FormatFeature::SAMPLED_TEXTURE) != FormatFeature::NONE) {
+    if (getFormatFeatures(Format::PVRTC_RGBA2) != FormatFeature::NONE) {
         compressedFmts += "pvrtc ";
     }
 
@@ -680,7 +679,6 @@ void CCVKDevice::waitAllFences() {
 }
 
 void CCVKDevice::initFormatFeature() {
-
     const auto           formatLen     = static_cast<size_t>(Format::COUNT);
     VkFormatProperties   properties    = {};
     VkFormat             format        = {};

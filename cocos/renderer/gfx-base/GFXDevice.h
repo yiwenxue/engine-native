@@ -104,8 +104,8 @@ public:
     inline const String &    getDeviceName() const { return _deviceName; }
     inline const String &    getRenderer() const { return _renderer; }
     inline const String &    getVendor() const { return _vendor; }
-    inline bool              hasFeature(Feature feature) const { return _features[static_cast<uint32_t>(feature)]; }
-    inline FormatFeature     getFormatFeatures(Format format) { return _formatFeatures[static_cast<uint32_t>(format)]; }
+    inline bool              hasFeature(Feature feature) const { return _features[toNumber(feature)]; }
+    inline FormatFeature     getFormatFeatures(Format format) const { return _formatFeatures[toNumber(format)]; }
 
     inline const BindingMappingInfo &bindingMappingInfo() const { return _bindingMappingInfo; }
 

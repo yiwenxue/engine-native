@@ -50,7 +50,7 @@ void InputAssemblerValidator::doInit(const InputAssemblerInfo &info) {
 
     // vertex attributes validations
     for (auto const &attribute : info.attributes) {
-        CCASSERT(hasAllFlags(DeviceValidator::getInstance()->getFormatFeatures(attribute.format), FormatFeature::VERTEX_ATTRIBUTE), "Format not supported for the specified features");
+        CCASSERT(hasFlag(DeviceValidator::getInstance()->getFormatFeatures(attribute.format), FormatFeature::VERTEX_ATTRIBUTE), "Format not supported for the specified features");
     }
 
     for (auto *vertexBuffer : info.vertexBuffers) {

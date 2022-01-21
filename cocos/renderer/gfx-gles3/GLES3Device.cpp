@@ -139,17 +139,17 @@ bool GLES3Device::doInit(const DeviceInfo & /*info*/) {
 
     String compressedFmts;
 
-    if (checkExtension("compressed_ETC1")) {
+    if (getFormatFeatures(Format::ETC_RGB8) != FormatFeature::NONE) {
         compressedFmts += "etc1 ";
     }
 
     compressedFmts += "etc2 ";
 
-    if (checkExtension("texture_compression_pvrtc")) {
+    if (getFormatFeatures(Format::PVRTC_RGB2) != FormatFeature::NONE) {
         compressedFmts += "pvrtc ";
     }
 
-    if (checkExtension("texture_compression_astc")) {
+    if (getFormatFeatures(Format::ASTC_RGBA_4X4) != FormatFeature::NONE) {
         compressedFmts += "astc ";
     }
 
@@ -262,16 +262,14 @@ void GLES3Device::initFormatFeature() {
     FormatFeature tempFeature = {};
 
     // builtin
-    tempFeature = FormatFeature::SAMPLED_TEXTURE | FormatFeature::RENDER_TARGET | FormatFeature::LINEAR_FILTER
-        | FormatFeature::STORAGE_TEXTURE | FormatFeature::VERTEX_ATTRIBUTE;
+    tempFeature = FormatFeature::SAMPLED_TEXTURE | FormatFeature::RENDER_TARGET | FormatFeature::LINEAR_FILTER | FormatFeature::STORAGE_TEXTURE | FormatFeature::VERTEX_ATTRIBUTE;
 
     _formatFeatures[toNumber(Format::R8)]    = tempFeature;
     _formatFeatures[toNumber(Format::RG8)]   = tempFeature;
     _formatFeatures[toNumber(Format::RGB8)]  = tempFeature;
     _formatFeatures[toNumber(Format::RGBA8)] = tempFeature;
 
-    tempFeature = FormatFeature::SAMPLED_TEXTURE | FormatFeature::RENDER_TARGET | FormatFeature::LINEAR_FILTER
-        | FormatFeature::STORAGE_TEXTURE;
+    tempFeature = FormatFeature::SAMPLED_TEXTURE | FormatFeature::RENDER_TARGET | FormatFeature::LINEAR_FILTER | FormatFeature::STORAGE_TEXTURE;
 
     _formatFeatures[toNumber(Format::R8SN)]    = tempFeature;
     _formatFeatures[toNumber(Format::RG8SN)]   = tempFeature;
@@ -291,27 +289,23 @@ void GLES3Device::initFormatFeature() {
     _formatFeatures[toNumber(Format::DEPTH)]         = tempFeature;
     _formatFeatures[toNumber(Format::DEPTH_STENCIL)] = tempFeature;
 
-    tempFeature = FormatFeature::SAMPLED_TEXTURE | FormatFeature::RENDER_TARGET | FormatFeature::LINEAR_FILTER
-        | FormatFeature::STORAGE_TEXTURE | FormatFeature::VERTEX_ATTRIBUTE;
+    tempFeature = FormatFeature::SAMPLED_TEXTURE | FormatFeature::RENDER_TARGET | FormatFeature::LINEAR_FILTER | FormatFeature::STORAGE_TEXTURE | FormatFeature::VERTEX_ATTRIBUTE;
 
     _formatFeatures[toNumber(Format::R16F)]    = tempFeature;
     _formatFeatures[toNumber(Format::RG16F)]   = tempFeature;
     _formatFeatures[toNumber(Format::RGB16F)]  = tempFeature;
     _formatFeatures[toNumber(Format::RGBA16F)] = tempFeature;
 
-    tempFeature = FormatFeature::SAMPLED_TEXTURE | FormatFeature::RENDER_TARGET | FormatFeature::STORAGE_TEXTURE
-        | FormatFeature::VERTEX_ATTRIBUTE;
+    tempFeature = FormatFeature::SAMPLED_TEXTURE | FormatFeature::RENDER_TARGET | FormatFeature::STORAGE_TEXTURE | FormatFeature::VERTEX_ATTRIBUTE;
 
     _formatFeatures[toNumber(Format::R32F)]    = tempFeature;
     _formatFeatures[toNumber(Format::RG32F)]   = tempFeature;
     _formatFeatures[toNumber(Format::RGB32F)]  = tempFeature;
     _formatFeatures[toNumber(Format::RGBA32F)] = tempFeature;
 
-    _formatFeatures[toNumber(Format::RGB10A2UI)] = FormatFeature::RENDER_TARGET | FormatFeature::LINEAR_FILTER
-        | FormatFeature::STORAGE_TEXTURE;
+    _formatFeatures[toNumber(Format::RGB10A2UI)] = FormatFeature::RENDER_TARGET | FormatFeature::LINEAR_FILTER | FormatFeature::STORAGE_TEXTURE;
 
-    tempFeature = FormatFeature::SAMPLED_TEXTURE | FormatFeature::RENDER_TARGET | FormatFeature::LINEAR_FILTER
-        | FormatFeature::STORAGE_TEXTURE | FormatFeature::VERTEX_ATTRIBUTE;
+    tempFeature = FormatFeature::SAMPLED_TEXTURE | FormatFeature::RENDER_TARGET | FormatFeature::LINEAR_FILTER | FormatFeature::STORAGE_TEXTURE | FormatFeature::VERTEX_ATTRIBUTE;
 
     _formatFeatures[toNumber(Format::R8I)]   = tempFeature;
     _formatFeatures[toNumber(Format::R8UI)]  = tempFeature;

@@ -149,15 +149,15 @@ bool GLES2Device::doInit(const DeviceInfo & /*info*/) {
 #endif
 
     String compressedFmts;
-    if (checkExtension("compressed_ETC1")) {
+    if (getFormatFeatures(Format::ETC_RGB8) != FormatFeature::NONE) {
         compressedFmts += "etc1 ";
     }
 
-    if (checkExtension("texture_compression_pvrtc")) {
+    if (getFormatFeatures(Format::PVRTC_RGB2) != FormatFeature::NONE) {
         compressedFmts += "pvrtc ";
     }
 
-    if (checkExtension("texture_compression_astc")) {
+    if (getFormatFeatures(Format::ASTC_RGBA_4X4) != FormatFeature::NONE) {
         compressedFmts += "astc ";
     }
 
@@ -268,47 +268,47 @@ void GLES2Device::initFormatFeature() {
     _formatFeatures[toNumber(Format::RGB8)] |= FormatFeature::VERTEX_ATTRIBUTE;
     _formatFeatures[toNumber(Format::RGBA8)] |= FormatFeature::VERTEX_ATTRIBUTE;
 
-    _formatFeatures[toNumber(Format::R8I)]    |= FormatFeature::VERTEX_ATTRIBUTE;
-    _formatFeatures[toNumber(Format::RG8I)]   |= FormatFeature::VERTEX_ATTRIBUTE;
-    _formatFeatures[toNumber(Format::RGB8I)]  |= FormatFeature::VERTEX_ATTRIBUTE;
+    _formatFeatures[toNumber(Format::R8I)] |= FormatFeature::VERTEX_ATTRIBUTE;
+    _formatFeatures[toNumber(Format::RG8I)] |= FormatFeature::VERTEX_ATTRIBUTE;
+    _formatFeatures[toNumber(Format::RGB8I)] |= FormatFeature::VERTEX_ATTRIBUTE;
     _formatFeatures[toNumber(Format::RGBA8I)] |= FormatFeature::VERTEX_ATTRIBUTE;
 
-    _formatFeatures[toNumber(Format::R8UI)]    |= FormatFeature::VERTEX_ATTRIBUTE;
-    _formatFeatures[toNumber(Format::RG8UI)]   |= FormatFeature::VERTEX_ATTRIBUTE;
-    _formatFeatures[toNumber(Format::RGB8UI)]  |= FormatFeature::VERTEX_ATTRIBUTE;
+    _formatFeatures[toNumber(Format::R8UI)] |= FormatFeature::VERTEX_ATTRIBUTE;
+    _formatFeatures[toNumber(Format::RG8UI)] |= FormatFeature::VERTEX_ATTRIBUTE;
+    _formatFeatures[toNumber(Format::RGB8UI)] |= FormatFeature::VERTEX_ATTRIBUTE;
     _formatFeatures[toNumber(Format::RGBA8UI)] |= FormatFeature::VERTEX_ATTRIBUTE;
 
-    _formatFeatures[toNumber(Format::R16I)]    |= FormatFeature::VERTEX_ATTRIBUTE;
-    _formatFeatures[toNumber(Format::RG16I)]   |= FormatFeature::VERTEX_ATTRIBUTE;
-    _formatFeatures[toNumber(Format::RGB16I)]  |= FormatFeature::VERTEX_ATTRIBUTE;
+    _formatFeatures[toNumber(Format::R16I)] |= FormatFeature::VERTEX_ATTRIBUTE;
+    _formatFeatures[toNumber(Format::RG16I)] |= FormatFeature::VERTEX_ATTRIBUTE;
+    _formatFeatures[toNumber(Format::RGB16I)] |= FormatFeature::VERTEX_ATTRIBUTE;
     _formatFeatures[toNumber(Format::RGBA16I)] |= FormatFeature::VERTEX_ATTRIBUTE;
 
-    _formatFeatures[toNumber(Format::R16UI)]    |= FormatFeature::VERTEX_ATTRIBUTE;
-    _formatFeatures[toNumber(Format::RG16UI)]   |= FormatFeature::VERTEX_ATTRIBUTE;
-    _formatFeatures[toNumber(Format::RGB16UI)]  |= FormatFeature::VERTEX_ATTRIBUTE;
+    _formatFeatures[toNumber(Format::R16UI)] |= FormatFeature::VERTEX_ATTRIBUTE;
+    _formatFeatures[toNumber(Format::RG16UI)] |= FormatFeature::VERTEX_ATTRIBUTE;
+    _formatFeatures[toNumber(Format::RGB16UI)] |= FormatFeature::VERTEX_ATTRIBUTE;
     _formatFeatures[toNumber(Format::RGBA16UI)] |= FormatFeature::VERTEX_ATTRIBUTE;
 
-    _formatFeatures[toNumber(Format::R32F)]    |= FormatFeature::VERTEX_ATTRIBUTE;
-    _formatFeatures[toNumber(Format::RG32F)]   |= FormatFeature::VERTEX_ATTRIBUTE;
-    _formatFeatures[toNumber(Format::RGB32F)]  |= FormatFeature::VERTEX_ATTRIBUTE;
+    _formatFeatures[toNumber(Format::R32F)] |= FormatFeature::VERTEX_ATTRIBUTE;
+    _formatFeatures[toNumber(Format::RG32F)] |= FormatFeature::VERTEX_ATTRIBUTE;
+    _formatFeatures[toNumber(Format::RGB32F)] |= FormatFeature::VERTEX_ATTRIBUTE;
     _formatFeatures[toNumber(Format::RGBA32F)] |= FormatFeature::VERTEX_ATTRIBUTE;
 
     if (checkExtension("OES_vertex_half_float")) {
-        _formatFeatures[toNumber(Format::R16F)]    |= FormatFeature::VERTEX_ATTRIBUTE;
-        _formatFeatures[toNumber(Format::RG16F)]   |= FormatFeature::VERTEX_ATTRIBUTE;
-        _formatFeatures[toNumber(Format::RGB16F)]  |= FormatFeature::VERTEX_ATTRIBUTE;
+        _formatFeatures[toNumber(Format::R16F)] |= FormatFeature::VERTEX_ATTRIBUTE;
+        _formatFeatures[toNumber(Format::RG16F)] |= FormatFeature::VERTEX_ATTRIBUTE;
+        _formatFeatures[toNumber(Format::RGB16F)] |= FormatFeature::VERTEX_ATTRIBUTE;
         _formatFeatures[toNumber(Format::RGBA16F)] |= FormatFeature::VERTEX_ATTRIBUTE;
     }
 
-    _formatFeatures[toNumber(Format::DEPTH)]   |= FormatFeature::RENDER_TARGET;
+    _formatFeatures[toNumber(Format::DEPTH)] |= FormatFeature::RENDER_TARGET;
     _textureExclusive[toNumber(Format::DEPTH)] = false;
 
-    _formatFeatures[toNumber(Format::DEPTH_STENCIL)]   |= FormatFeature::RENDER_TARGET;
+    _formatFeatures[toNumber(Format::DEPTH_STENCIL)] |= FormatFeature::RENDER_TARGET;
     _textureExclusive[toNumber(Format::DEPTH_STENCIL)] = false;
 
     if (checkExtension("EXT_sRGB")) {
-        _formatFeatures[toNumber(Format::SRGB8)]      |= completeFeature;
-        _formatFeatures[toNumber(Format::SRGB8_A8)]   |= completeFeature;
+        _formatFeatures[toNumber(Format::SRGB8)] |= completeFeature;
+        _formatFeatures[toNumber(Format::SRGB8_A8)] |= completeFeature;
         _textureExclusive[toNumber(Format::SRGB8_A8)] = false;
     }
 
