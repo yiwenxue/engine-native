@@ -1,3 +1,28 @@
+/****************************************************************************
+ Copyright (c) 2019-2022 Xiamen Yaji Software Co., Ltd.
+
+ http://www.cocos.com
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated engine source code (the "Software"), a limited,
+ worldwide, royalty-free, non-assignable, revocable and non-exclusive license
+ to use Cocos Creator solely to develop games on your target platforms. You shall
+ not use Cocos Creator software for developing other software or tools that's
+ used for developing games. You are not granted to publish, distribute,
+ sublicense, and/or sell copies of Cocos Creator.
+
+ The software or tools in this License Agreement are licensed, not sold.
+ Xiamen Yaji Software Co., Ltd. reserves all rights not expressly granted to you.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+****************************************************************************/
+
 #pragma once
 #include "base/Config.h"
 #include <type_traits>
@@ -7,32 +32,42 @@
 #include "cocos/bindings/auto/jsb_scene_auto.h"
 #include "cocos/physics/PhysicsSDK.h"
 
-extern se::Object* __jsb_cc_physics_World_proto;
-extern se::Class* __jsb_cc_physics_World_class;
+extern se::Object* __jsb_cc_physics_RevoluteJoint_proto;
+extern se::Class* __jsb_cc_physics_RevoluteJoint_class;
 
-bool js_register_cc_physics_World(se::Object* obj);
+bool js_register_cc_physics_RevoluteJoint(se::Object* obj);
 bool register_all_physics(se::Object* obj);
 
-JSB_REGISTER_OBJECT_TYPE(cc::physics::World);
-SE_DECLARE_FUNC(js_physics_World_createConvex);
-SE_DECLARE_FUNC(js_physics_World_createHeightField);
-SE_DECLARE_FUNC(js_physics_World_createMaterial);
-SE_DECLARE_FUNC(js_physics_World_createTrimesh);
-SE_DECLARE_FUNC(js_physics_World_destroy);
-SE_DECLARE_FUNC(js_physics_World_emitEvents);
-SE_DECLARE_FUNC(js_physics_World_getContactEventPairs);
-SE_DECLARE_FUNC(js_physics_World_getTriggerEventPairs);
-SE_DECLARE_FUNC(js_physics_World_raycast);
-SE_DECLARE_FUNC(js_physics_World_raycastClosest);
-SE_DECLARE_FUNC(js_physics_World_raycastClosestResult);
-SE_DECLARE_FUNC(js_physics_World_raycastResult);
-SE_DECLARE_FUNC(js_physics_World_setAllowSleep);
-SE_DECLARE_FUNC(js_physics_World_setCollisionMatrix);
-SE_DECLARE_FUNC(js_physics_World_setGravity);
-SE_DECLARE_FUNC(js_physics_World_step);
-SE_DECLARE_FUNC(js_physics_World_syncSceneToPhysics);
-SE_DECLARE_FUNC(js_physics_World_syncSceneWithCheck);
-SE_DECLARE_FUNC(js_physics_World_World);
+JSB_REGISTER_OBJECT_TYPE(cc::physics::RevoluteJoint);
+SE_DECLARE_FUNC(js_physics_RevoluteJoint_getImpl);
+SE_DECLARE_FUNC(js_physics_RevoluteJoint_initialize);
+SE_DECLARE_FUNC(js_physics_RevoluteJoint_onDestroy);
+SE_DECLARE_FUNC(js_physics_RevoluteJoint_onDisable);
+SE_DECLARE_FUNC(js_physics_RevoluteJoint_onEnable);
+SE_DECLARE_FUNC(js_physics_RevoluteJoint_setAxis);
+SE_DECLARE_FUNC(js_physics_RevoluteJoint_setConnectedBody);
+SE_DECLARE_FUNC(js_physics_RevoluteJoint_setEnableCollision);
+SE_DECLARE_FUNC(js_physics_RevoluteJoint_setPivotA);
+SE_DECLARE_FUNC(js_physics_RevoluteJoint_setPivotB);
+SE_DECLARE_FUNC(js_physics_RevoluteJoint_RevoluteJoint);
+
+extern se::Object* __jsb_cc_physics_DistanceJoint_proto;
+extern se::Class* __jsb_cc_physics_DistanceJoint_class;
+
+bool js_register_cc_physics_DistanceJoint(se::Object* obj);
+bool register_all_physics(se::Object* obj);
+
+JSB_REGISTER_OBJECT_TYPE(cc::physics::DistanceJoint);
+SE_DECLARE_FUNC(js_physics_DistanceJoint_getImpl);
+SE_DECLARE_FUNC(js_physics_DistanceJoint_initialize);
+SE_DECLARE_FUNC(js_physics_DistanceJoint_onDestroy);
+SE_DECLARE_FUNC(js_physics_DistanceJoint_onDisable);
+SE_DECLARE_FUNC(js_physics_DistanceJoint_onEnable);
+SE_DECLARE_FUNC(js_physics_DistanceJoint_setConnectedBody);
+SE_DECLARE_FUNC(js_physics_DistanceJoint_setEnableCollision);
+SE_DECLARE_FUNC(js_physics_DistanceJoint_setPivotA);
+SE_DECLARE_FUNC(js_physics_DistanceJoint_setPivotB);
+SE_DECLARE_FUNC(js_physics_DistanceJoint_DistanceJoint);
 
 extern se::Object* __jsb_cc_physics_RigidBody_proto;
 extern se::Class* __jsb_cc_physics_RigidBody_class;
@@ -288,40 +323,30 @@ SE_DECLARE_FUNC(js_physics_TerrainShape_setTerrain);
 SE_DECLARE_FUNC(js_physics_TerrainShape_updateEventListener);
 SE_DECLARE_FUNC(js_physics_TerrainShape_TerrainShape);
 
-extern se::Object* __jsb_cc_physics_RevoluteJoint_proto;
-extern se::Class* __jsb_cc_physics_RevoluteJoint_class;
+extern se::Object* __jsb_cc_physics_World_proto;
+extern se::Class* __jsb_cc_physics_World_class;
 
-bool js_register_cc_physics_RevoluteJoint(se::Object* obj);
+bool js_register_cc_physics_World(se::Object* obj);
 bool register_all_physics(se::Object* obj);
 
-JSB_REGISTER_OBJECT_TYPE(cc::physics::RevoluteJoint);
-SE_DECLARE_FUNC(js_physics_RevoluteJoint_getImpl);
-SE_DECLARE_FUNC(js_physics_RevoluteJoint_initialize);
-SE_DECLARE_FUNC(js_physics_RevoluteJoint_onDestroy);
-SE_DECLARE_FUNC(js_physics_RevoluteJoint_onDisable);
-SE_DECLARE_FUNC(js_physics_RevoluteJoint_onEnable);
-SE_DECLARE_FUNC(js_physics_RevoluteJoint_setAxis);
-SE_DECLARE_FUNC(js_physics_RevoluteJoint_setConnectedBody);
-SE_DECLARE_FUNC(js_physics_RevoluteJoint_setEnableCollision);
-SE_DECLARE_FUNC(js_physics_RevoluteJoint_setPivotA);
-SE_DECLARE_FUNC(js_physics_RevoluteJoint_setPivotB);
-SE_DECLARE_FUNC(js_physics_RevoluteJoint_RevoluteJoint);
-
-extern se::Object* __jsb_cc_physics_DistanceJoint_proto;
-extern se::Class* __jsb_cc_physics_DistanceJoint_class;
-
-bool js_register_cc_physics_DistanceJoint(se::Object* obj);
-bool register_all_physics(se::Object* obj);
-
-JSB_REGISTER_OBJECT_TYPE(cc::physics::DistanceJoint);
-SE_DECLARE_FUNC(js_physics_DistanceJoint_getImpl);
-SE_DECLARE_FUNC(js_physics_DistanceJoint_initialize);
-SE_DECLARE_FUNC(js_physics_DistanceJoint_onDestroy);
-SE_DECLARE_FUNC(js_physics_DistanceJoint_onDisable);
-SE_DECLARE_FUNC(js_physics_DistanceJoint_onEnable);
-SE_DECLARE_FUNC(js_physics_DistanceJoint_setConnectedBody);
-SE_DECLARE_FUNC(js_physics_DistanceJoint_setEnableCollision);
-SE_DECLARE_FUNC(js_physics_DistanceJoint_setPivotA);
-SE_DECLARE_FUNC(js_physics_DistanceJoint_setPivotB);
-SE_DECLARE_FUNC(js_physics_DistanceJoint_DistanceJoint);
+JSB_REGISTER_OBJECT_TYPE(cc::physics::World);
+SE_DECLARE_FUNC(js_physics_World_createConvex);
+SE_DECLARE_FUNC(js_physics_World_createHeightField);
+SE_DECLARE_FUNC(js_physics_World_createMaterial);
+SE_DECLARE_FUNC(js_physics_World_createTrimesh);
+SE_DECLARE_FUNC(js_physics_World_destroy);
+SE_DECLARE_FUNC(js_physics_World_emitEvents);
+SE_DECLARE_FUNC(js_physics_World_getContactEventPairs);
+SE_DECLARE_FUNC(js_physics_World_getTriggerEventPairs);
+SE_DECLARE_FUNC(js_physics_World_raycast);
+SE_DECLARE_FUNC(js_physics_World_raycastClosest);
+SE_DECLARE_FUNC(js_physics_World_raycastClosestResult);
+SE_DECLARE_FUNC(js_physics_World_raycastResult);
+SE_DECLARE_FUNC(js_physics_World_setAllowSleep);
+SE_DECLARE_FUNC(js_physics_World_setCollisionMatrix);
+SE_DECLARE_FUNC(js_physics_World_setGravity);
+SE_DECLARE_FUNC(js_physics_World_step);
+SE_DECLARE_FUNC(js_physics_World_syncSceneToPhysics);
+SE_DECLARE_FUNC(js_physics_World_syncSceneWithCheck);
+SE_DECLARE_FUNC(js_physics_World_World);
 
