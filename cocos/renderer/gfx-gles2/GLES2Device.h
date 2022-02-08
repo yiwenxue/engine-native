@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2019-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2019-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -28,6 +28,7 @@
 #include "GLES2Std.h"
 #include "gfx-base/GFXDevice.h"
 #include "gfx-base/GFXSwapchain.h"
+#include "gfx-gles-common/GLESCommandPool.h"
 
 namespace cc {
 namespace gfx {
@@ -67,6 +68,8 @@ public:
     void acquire(Swapchain *const *swapchains, uint32_t count) override;
     void present() override;
 
+    inline const GLESBindingMapping &bindingMappings() const { return _bindingMappings; }
+
     inline GLES2GPUContext *            context() const { return _gpuContext; }
     inline GLES2GPUStateCache *         stateCache() const { return _gpuStateCache; }
     inline GLES2GPUBlitManager *        blitManager() const { return _gpuBlitManager; }
@@ -79,6 +82,9 @@ public:
             return ext.find(extension) != String::npos;
         });
     }
+
+    // check the specified format is texture-exclusive (no renderbuffers allowed)
+    inline bool isTextureExclusive(const Format &format) { return _textureExclusive[static_cast<size_t>(format)]; };
 
 protected:
     static GLES2Device *instance;
@@ -112,7 +118,7 @@ protected:
 
     void bindContext(bool bound) override;
 
-    static bool checkForETC2();
+    void initFormatFeature();
 
     GLES2GPUContext *            _gpuContext{nullptr};
     GLES2GPUStateCache *         _gpuStateCache{nullptr};
@@ -122,6 +128,10 @@ protected:
     GLES2GPUFramebufferCacheMap *_gpuFramebufferCacheMap{nullptr};
 
     vector<GLES2GPUSwapchain *> _swapchains;
+
+    std::array<bool, static_cast<size_t>(Format::COUNT)> _textureExclusive;
+
+    GLESBindingMapping _bindingMappings;
 
     StringArray _extensions;
 };

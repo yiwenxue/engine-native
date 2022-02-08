@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2020-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2020-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -222,9 +222,6 @@ enum class CC_DLL PipelineGlobalBindings {
 };
 CC_ENUM_CONVERSION_OPERATOR(PipelineGlobalBindings)
 
-extern CC_DLL int globalUBOCount;
-extern CC_DLL int globalSamplerCount;
-
 enum class CC_DLL ModelLocalBindings {
     UBO_LOCAL,
     UBO_FORWARD_LIGHTS,
@@ -240,14 +237,12 @@ enum class CC_DLL ModelLocalBindings {
     SAMPLER_LIGHTMAP,
     SAMPLER_SPRITE,
     SAMPLER_REFLECTION,
+
     STORAGE_REFLECTION,
 
     COUNT,
 };
 CC_ENUM_CONVERSION_OPERATOR(ModelLocalBindings)
-
-extern CC_DLL int localUBOCount;
-extern CC_DLL int localSamplerCount;
 
 enum class CC_DLL SetIndex {
     GLOBAL,
@@ -491,9 +486,9 @@ const uint CAMERA_DEFAULT_MASK = ~static_cast<uint>(LayerList::UI_2D) & ~static_
 
 uint nextPow2(uint val);
 
-bool supportsHalfFloatTexture(gfx::Device *device);
+bool supportsR16HalfFloatTexture(gfx::Device *device);
 
-bool supportsFloatTexture(gfx::Device *device);
+bool supportsR32FloatTexture(gfx::Device *device);
 
 extern CC_DLL uint skyboxFlag;
 

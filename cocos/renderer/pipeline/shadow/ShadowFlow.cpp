@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2020-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2020-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -97,8 +97,8 @@ void ShadowFlow::render(scene::Camera *camera) {
     }
 
     for (uint l = 0; l < _validLights.size(); ++l) {
-        const scene::Light *light      = _validLights[l];
-        gfx::DescriptorSet *globalDS   = _pipeline->getGlobalDSManager()->getOrCreateDescriptorSet(l);
+        const scene::Light *light    = _validLights[l];
+        gfx::DescriptorSet *globalDS = _pipeline->getGlobalDSManager()->getOrCreateDescriptorSet(l);
 
         if (!shadowFramebufferMap.count(light)) {
             initShadowFrameBuffer(_pipeline, light);
@@ -117,7 +117,7 @@ void ShadowFlow::render(scene::Camera *camera) {
 void ShadowFlow::lightCollecting() {
     _validLights.clear();
 
-    const vector<const scene::Light*> validPunctualLights = _pipeline->getPipelineSceneData()->getValidPunctualLights();
+    const vector<const scene::Light *> validPunctualLights = _pipeline->getPipelineSceneData()->getValidPunctualLights();
     for (const scene::Light *light : validPunctualLights) {
         if (light->getType() == scene::LightType::SPOT) {
             _validLights.emplace_back(light);
@@ -145,8 +145,8 @@ void ShadowFlow::clearShadowMap(scene::Camera *camera) {
     }
 
     for (uint l = 0; l < _validLights.size(); ++l) {
-        const scene::Light *light      = _validLights[l];
-        gfx::DescriptorSet *globalDS   = _pipeline->getGlobalDSManager()->getOrCreateDescriptorSet(l);
+        const scene::Light *light    = _validLights[l];
+        gfx::DescriptorSet *globalDS = _pipeline->getGlobalDSManager()->getOrCreateDescriptorSet(l);
 
         if (!shadowFramebufferMap.count(light)) {
             continue;
@@ -166,7 +166,7 @@ void ShadowFlow::resizeShadowMap(scene::Shadow **shadowInfo) {
     auto *      device    = gfx::Device::getInstance();
     const auto  width     = static_cast<uint>((*shadowInfo)->size.x);
     const auto  height    = static_cast<uint>((*shadowInfo)->size.y);
-    const auto  format    = supportsFloatTexture(device) ? gfx::Format::R32F : gfx::Format::RGBA8;
+    const auto  format    = supportsR32FloatTexture(device) ? gfx::Format::R32F : gfx::Format::RGBA8;
 
     for (const auto &pair : sceneData->getShadowFramebufferMap()) {
         gfx::Framebuffer *framebuffer = pair.second;
@@ -220,7 +220,7 @@ void ShadowFlow::initShadowFrameBuffer(RenderPipeline *pipeline, const scene::Li
     const auto  shadowMapSize = shadowInfo->size;
     const auto  width         = static_cast<uint>(shadowMapSize.x);
     const auto  height        = static_cast<uint>(shadowMapSize.y);
-    const auto  format        = supportsFloatTexture(device) ? gfx::Format::R32F : gfx::Format::RGBA8;
+    const auto  format        = supportsR32FloatTexture(device) ? gfx::Format::R32F : gfx::Format::RGBA8;
 
     const gfx::ColorAttachment colorAttachment = {
         format,
@@ -247,7 +247,7 @@ void ShadowFlow::initShadowFrameBuffer(RenderPipeline *pipeline, const scene::Li
     rpInfo.depthStencilAttachment = depthStencilAttachment;
 
     size_t rpHash = cc::gfx::RenderPass::computeHash(rpInfo);
-    auto iter   = renderPassHashMap.find(rpHash);
+    auto   iter   = renderPassHashMap.find(rpHash);
     if (iter != renderPassHashMap.end()) {
         _renderPass = iter->second;
     } else {

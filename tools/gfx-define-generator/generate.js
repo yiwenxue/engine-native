@@ -72,12 +72,19 @@ while (enumCap) {
     enumCap = enumRE.exec(header);
 }
 
-// now discard all block comments
-header = header.replace(/\/\*.*?\*\//gs, '');
-header = header.replace(/\s*[*&](.)/g, (_, c) => (c === '>' ? '' : ' ') + c);
-header = header.replace(/(?:\w*::)?vector<(.+?)>/g, '$1[]');
-// and preprocessors
+// save & strip block comments
+const blockComments = [];
+const blockCommentsRE = /(\/\*\*.*?\*\/)\s*(.+?\n)/gs;
+header = header.replace(blockCommentsRE, (_, comments, succeeding) => {
+    blockComments.push({ succeeding, source: comments });
+    return succeeding;
+});
+// discard preprocessors
 header = header.replace(/\s*#(if|else|elif|end).*/gm, '');
+// replace vector<x>
+header = header.replace(/(?:\w*::)?vector<(.+?)>/g, (_, type) => {
+    return `${type.replace(/[*\s]+/g, '')}[]`;
+});
 
 const typedefRE = /^\s*using\s+(.+?)\s*=\s*(.+?);/gsm;
 const typedefMap = { lists: {}, others: [] };
@@ -124,7 +131,7 @@ const getMemberList = (() => {
     };
 })();
 
-const structRE = /(struct\s+(?:\w+\(\w+\)\s+)?)(\w+).*?{\s*(.+?)\s*};/gs;
+const structRE = /(struct\s+(?:\w+\(\w+\)\s+)?(\w+).*?){\s*.+?\s*};/gs;
 const structMemberRE = /^\s*(const\w*\s*)?([\w[\]]+)\s+?(\w+)(?:\s*[={]?\s*(.*?)\s*}*\s*)?;(?:\s*\/\/\s*@ts-(.*?)$)?/gm;
 const structMap = {};
 const replaceConstants = (() => {
@@ -153,9 +160,13 @@ const getArrayValue = (decayedType, value) => {
 let structCap = structRE.exec(header);
 while (structCap) {
     const struct = structMap[structCap[2]] = {};
+    struct.comments = blockComments.find((c) => structCap[0].startsWith(c.succeeding))?.source;
+
     struct.member = {};
     // structRE can not reliably extract the correct member declaration range
-    const memberList = getMemberList(header, structCap.index + structCap[1].length);
+    let memberList = getMemberList(header, structCap.index + structCap[1].length);
+    // discard pointer signs
+    memberList = memberList.replace(/\*/g, '');
 
     let memberCap = structMemberRE.exec(memberList);
     while (memberCap) {
@@ -164,12 +175,11 @@ while (structCap) {
             let readonly = false;
             if (typedefMap.lists[type]) {
                 type = typedefMap.lists[type];
-            } else {
-                type = type.replace(/(\b)(void)(\b)/, '$1number$1');
-                type = type.replace(/(\b)(?:uint\w+?_t|int\w+?_t|float)(\b)/, '$1number$1');
-                type = type.replace(/(\b)(?:bool)(\b)/, '$1boolean$2');
-                type = type.replace(/(\b)(?:String)(\b)/, '$1string$2');
             }
+            type = type.replace(/(\b)(void)(\b)/, '$1number$1');
+            type = type.replace(/(\b)(?:uint\w+?_t|int\w+?_t|float)(\b)/, '$1number$1');
+            type = type.replace(/(\b)(?:bool)(\b)/, '$1boolean$2');
+            type = type.replace(/(\b)(?:String)(\b)/, '$1string$2');
             if (memberCap[1]) { readonly = true; }
             const isArray = type.endsWith('[]');
             const decayedType = isArray ? type.slice(0, -2) : type;
@@ -178,9 +188,14 @@ while (structCap) {
             let n = Number.parseInt(value);
             if (!Number.isNaN(n)) {
                 if (!value.startsWith('0x')) { value = n; } // keep hexadecimal numbers
+                else if (value.endsWith('U')) { value = value.slice(0, -1); }
+                if (isArray) {
+                    if (decayedType === 'number') { value = `[${value}]`; } // vector<int> v{3};
+                    else { value = getArrayValue(decayedType, value); } // vector<Object> v{3};
+                }
             } else if (value) {
                 value = replaceConstants(value);
-                if (isArray) { value = getArrayValue(decayedType, value); }
+                if (isArray) { value = `[${value}]`; }
             } else {
                 if (isArray) { value = '[]'; }
                 else if (type === 'string') { value = '\'\''; }
@@ -197,6 +212,9 @@ while (structCap) {
                 if (directives.startsWith('nullable')) {
                     info.type += ' | null';
                     info.value = 'null';
+                } else if (directives.startsWith('boolean')) {
+                    info.type = 'boolean';
+                    info.value = !!info.value;
                 } else if (directives.startsWith('overrides')) {
                     let overrides = {};
                     try { overrides = yaml.load(memberCap[5].slice(9)); }
@@ -242,16 +260,17 @@ output += `\n`;
 
 for (const name of Object.keys(structMap)) {
     if (name in ignoreList) { continue; }
+    const struct = structMap[name];
 
+    if (struct.comments) { output += struct.comments + '\n'; }
     output += `export class ${name} {\n    declare private _token: never; `;
     output += `// to make sure all usages must be an instance of this exact class, not assembled from plain object`;
     output += `\n\n    constructor (\n`;
 
-    const struct = structMap[name];
     for (const key in struct.member) {
         const { readonly, type, value } = struct.member[key];
         const decl = readonly ? `readonly ${key}` : key;
-        if (value || value === 0) {
+        if (value || value === 0 || value === false) {
             output += `        public ${decl}: ${type} = ${value},\n`;
         } else {
             output += `        public ${decl}: ${type},\n`;

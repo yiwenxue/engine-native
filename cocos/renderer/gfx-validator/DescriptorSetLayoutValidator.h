@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2020-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2020-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -39,8 +39,12 @@ public:
     inline bool isInited() const { return _inited; }
 
 protected:
+    friend class PipelineLayoutValidator;
+
     void doInit(const DescriptorSetLayoutInfo &info) override;
     void doDestroy() override;
+
+    vector<uint32_t> _typeCounts;
 
     bool _inited{false};
 };

@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2019-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2019-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -115,6 +115,7 @@ protected:
     void                 getQueryPoolResults(QueryPool *queryPool) override;
 
     void onMemoryWarning();
+    void initFormatFeatures(uint family);
 
     void *                     _mtlCommandQueue                             = nullptr;
     void *                     _mtlDevice                                   = nullptr;

@@ -1,3 +1,28 @@
+/****************************************************************************
+ Copyright (c) 2019-2022 Xiamen Yaji Software Co., Ltd.
+
+ http://www.cocos.com
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated engine source code (the "Software"), a limited,
+ worldwide, royalty-free, non-assignable, revocable and non-exclusive license
+ to use Cocos Creator solely to develop games on your target platforms. You shall
+ not use Cocos Creator software for developing other software or tools that's
+ used for developing games. You are not granted to publish, distribute,
+ sublicense, and/or sell copies of Cocos Creator.
+
+ The software or tools in this License Agreement are licensed, not sold.
+ Xiamen Yaji Software Co., Ltd. reserves all rights not expressly granted to you.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+****************************************************************************/
+
 #include "cocos/bindings/auto/jsb_gfx_auto.h"
 #include "cocos/bindings/manual/jsb_conversions.h"
 #include "cocos/bindings/manual/jsb_global.h"
@@ -3545,86 +3570,221 @@ bool js_register_gfx_Color(se::Object* obj) // NOLINT(readability-identifier-nam
 se::Object* __jsb_cc_gfx_BindingMappingInfo_proto = nullptr;
 se::Class* __jsb_cc_gfx_BindingMappingInfo_class = nullptr;
 
-static bool js_gfx_BindingMappingInfo_get_bufferOffsets(se::State& s) // NOLINT(readability-identifier-naming)
+static bool js_gfx_BindingMappingInfo_get_maxBlockCounts(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
-    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_get_bufferOffsets : Invalid Native Object");
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_get_maxBlockCounts : Invalid Native Object");
 
     CC_UNUSED bool ok = true;
     se::Value jsret;
-    ok &= nativevalue_to_se(cobj->bufferOffsets, jsret, s.thisObject() /*ctx*/);
+    ok &= nativevalue_to_se(cobj->maxBlockCounts, jsret, s.thisObject() /*ctx*/);
     s.rval() = jsret;
-    SE_HOLD_RETURN_VALUE(cobj->bufferOffsets, s.thisObject(), s.rval());
+    SE_HOLD_RETURN_VALUE(cobj->maxBlockCounts, s.thisObject(), s.rval());
     return true;
 }
-SE_BIND_PROP_GET(js_gfx_BindingMappingInfo_get_bufferOffsets)
+SE_BIND_PROP_GET(js_gfx_BindingMappingInfo_get_maxBlockCounts)
 
-static bool js_gfx_BindingMappingInfo_set_bufferOffsets(se::State& s) // NOLINT(readability-identifier-naming)
+static bool js_gfx_BindingMappingInfo_set_maxBlockCounts(se::State& s) // NOLINT(readability-identifier-naming)
 {
     const auto& args = s.args();
     auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
-    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_set_bufferOffsets : Invalid Native Object");
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_set_maxBlockCounts : Invalid Native Object");
 
     CC_UNUSED bool ok = true;
-    ok &= sevalue_to_native(args[0], &cobj->bufferOffsets, s.thisObject());
-    SE_PRECONDITION2(ok, false, "js_gfx_BindingMappingInfo_set_bufferOffsets : Error processing new value");
+    ok &= sevalue_to_native(args[0], &cobj->maxBlockCounts, s.thisObject());
+    SE_PRECONDITION2(ok, false, "js_gfx_BindingMappingInfo_set_maxBlockCounts : Error processing new value");
     return true;
 }
-SE_BIND_PROP_SET(js_gfx_BindingMappingInfo_set_bufferOffsets)
+SE_BIND_PROP_SET(js_gfx_BindingMappingInfo_set_maxBlockCounts)
 
-static bool js_gfx_BindingMappingInfo_get_samplerOffsets(se::State& s) // NOLINT(readability-identifier-naming)
+static bool js_gfx_BindingMappingInfo_get_maxSamplerTextureCounts(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
-    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_get_samplerOffsets : Invalid Native Object");
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_get_maxSamplerTextureCounts : Invalid Native Object");
 
     CC_UNUSED bool ok = true;
     se::Value jsret;
-    ok &= nativevalue_to_se(cobj->samplerOffsets, jsret, s.thisObject() /*ctx*/);
+    ok &= nativevalue_to_se(cobj->maxSamplerTextureCounts, jsret, s.thisObject() /*ctx*/);
     s.rval() = jsret;
-    SE_HOLD_RETURN_VALUE(cobj->samplerOffsets, s.thisObject(), s.rval());
+    SE_HOLD_RETURN_VALUE(cobj->maxSamplerTextureCounts, s.thisObject(), s.rval());
     return true;
 }
-SE_BIND_PROP_GET(js_gfx_BindingMappingInfo_get_samplerOffsets)
+SE_BIND_PROP_GET(js_gfx_BindingMappingInfo_get_maxSamplerTextureCounts)
 
-static bool js_gfx_BindingMappingInfo_set_samplerOffsets(se::State& s) // NOLINT(readability-identifier-naming)
+static bool js_gfx_BindingMappingInfo_set_maxSamplerTextureCounts(se::State& s) // NOLINT(readability-identifier-naming)
 {
     const auto& args = s.args();
     auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
-    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_set_samplerOffsets : Invalid Native Object");
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_set_maxSamplerTextureCounts : Invalid Native Object");
 
     CC_UNUSED bool ok = true;
-    ok &= sevalue_to_native(args[0], &cobj->samplerOffsets, s.thisObject());
-    SE_PRECONDITION2(ok, false, "js_gfx_BindingMappingInfo_set_samplerOffsets : Error processing new value");
+    ok &= sevalue_to_native(args[0], &cobj->maxSamplerTextureCounts, s.thisObject());
+    SE_PRECONDITION2(ok, false, "js_gfx_BindingMappingInfo_set_maxSamplerTextureCounts : Error processing new value");
     return true;
 }
-SE_BIND_PROP_SET(js_gfx_BindingMappingInfo_set_samplerOffsets)
+SE_BIND_PROP_SET(js_gfx_BindingMappingInfo_set_maxSamplerTextureCounts)
 
-static bool js_gfx_BindingMappingInfo_get_flexibleSet(se::State& s) // NOLINT(readability-identifier-naming)
+static bool js_gfx_BindingMappingInfo_get_maxSamplerCounts(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
-    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_get_flexibleSet : Invalid Native Object");
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_get_maxSamplerCounts : Invalid Native Object");
 
     CC_UNUSED bool ok = true;
     se::Value jsret;
-    ok &= nativevalue_to_se(cobj->flexibleSet, jsret, s.thisObject() /*ctx*/);
+    ok &= nativevalue_to_se(cobj->maxSamplerCounts, jsret, s.thisObject() /*ctx*/);
     s.rval() = jsret;
-    SE_HOLD_RETURN_VALUE(cobj->flexibleSet, s.thisObject(), s.rval());
+    SE_HOLD_RETURN_VALUE(cobj->maxSamplerCounts, s.thisObject(), s.rval());
     return true;
 }
-SE_BIND_PROP_GET(js_gfx_BindingMappingInfo_get_flexibleSet)
+SE_BIND_PROP_GET(js_gfx_BindingMappingInfo_get_maxSamplerCounts)
 
-static bool js_gfx_BindingMappingInfo_set_flexibleSet(se::State& s) // NOLINT(readability-identifier-naming)
+static bool js_gfx_BindingMappingInfo_set_maxSamplerCounts(se::State& s) // NOLINT(readability-identifier-naming)
 {
     const auto& args = s.args();
     auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
-    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_set_flexibleSet : Invalid Native Object");
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_set_maxSamplerCounts : Invalid Native Object");
 
     CC_UNUSED bool ok = true;
-    ok &= sevalue_to_native(args[0], &cobj->flexibleSet, s.thisObject());
-    SE_PRECONDITION2(ok, false, "js_gfx_BindingMappingInfo_set_flexibleSet : Error processing new value");
+    ok &= sevalue_to_native(args[0], &cobj->maxSamplerCounts, s.thisObject());
+    SE_PRECONDITION2(ok, false, "js_gfx_BindingMappingInfo_set_maxSamplerCounts : Error processing new value");
     return true;
 }
-SE_BIND_PROP_SET(js_gfx_BindingMappingInfo_set_flexibleSet)
+SE_BIND_PROP_SET(js_gfx_BindingMappingInfo_set_maxSamplerCounts)
+
+static bool js_gfx_BindingMappingInfo_get_maxTextureCounts(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_get_maxTextureCounts : Invalid Native Object");
+
+    CC_UNUSED bool ok = true;
+    se::Value jsret;
+    ok &= nativevalue_to_se(cobj->maxTextureCounts, jsret, s.thisObject() /*ctx*/);
+    s.rval() = jsret;
+    SE_HOLD_RETURN_VALUE(cobj->maxTextureCounts, s.thisObject(), s.rval());
+    return true;
+}
+SE_BIND_PROP_GET(js_gfx_BindingMappingInfo_get_maxTextureCounts)
+
+static bool js_gfx_BindingMappingInfo_set_maxTextureCounts(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    const auto& args = s.args();
+    auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_set_maxTextureCounts : Invalid Native Object");
+
+    CC_UNUSED bool ok = true;
+    ok &= sevalue_to_native(args[0], &cobj->maxTextureCounts, s.thisObject());
+    SE_PRECONDITION2(ok, false, "js_gfx_BindingMappingInfo_set_maxTextureCounts : Error processing new value");
+    return true;
+}
+SE_BIND_PROP_SET(js_gfx_BindingMappingInfo_set_maxTextureCounts)
+
+static bool js_gfx_BindingMappingInfo_get_maxBufferCounts(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_get_maxBufferCounts : Invalid Native Object");
+
+    CC_UNUSED bool ok = true;
+    se::Value jsret;
+    ok &= nativevalue_to_se(cobj->maxBufferCounts, jsret, s.thisObject() /*ctx*/);
+    s.rval() = jsret;
+    SE_HOLD_RETURN_VALUE(cobj->maxBufferCounts, s.thisObject(), s.rval());
+    return true;
+}
+SE_BIND_PROP_GET(js_gfx_BindingMappingInfo_get_maxBufferCounts)
+
+static bool js_gfx_BindingMappingInfo_set_maxBufferCounts(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    const auto& args = s.args();
+    auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_set_maxBufferCounts : Invalid Native Object");
+
+    CC_UNUSED bool ok = true;
+    ok &= sevalue_to_native(args[0], &cobj->maxBufferCounts, s.thisObject());
+    SE_PRECONDITION2(ok, false, "js_gfx_BindingMappingInfo_set_maxBufferCounts : Error processing new value");
+    return true;
+}
+SE_BIND_PROP_SET(js_gfx_BindingMappingInfo_set_maxBufferCounts)
+
+static bool js_gfx_BindingMappingInfo_get_maxImageCounts(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_get_maxImageCounts : Invalid Native Object");
+
+    CC_UNUSED bool ok = true;
+    se::Value jsret;
+    ok &= nativevalue_to_se(cobj->maxImageCounts, jsret, s.thisObject() /*ctx*/);
+    s.rval() = jsret;
+    SE_HOLD_RETURN_VALUE(cobj->maxImageCounts, s.thisObject(), s.rval());
+    return true;
+}
+SE_BIND_PROP_GET(js_gfx_BindingMappingInfo_get_maxImageCounts)
+
+static bool js_gfx_BindingMappingInfo_set_maxImageCounts(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    const auto& args = s.args();
+    auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_set_maxImageCounts : Invalid Native Object");
+
+    CC_UNUSED bool ok = true;
+    ok &= sevalue_to_native(args[0], &cobj->maxImageCounts, s.thisObject());
+    SE_PRECONDITION2(ok, false, "js_gfx_BindingMappingInfo_set_maxImageCounts : Error processing new value");
+    return true;
+}
+SE_BIND_PROP_SET(js_gfx_BindingMappingInfo_set_maxImageCounts)
+
+static bool js_gfx_BindingMappingInfo_get_maxSubpassInputCounts(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_get_maxSubpassInputCounts : Invalid Native Object");
+
+    CC_UNUSED bool ok = true;
+    se::Value jsret;
+    ok &= nativevalue_to_se(cobj->maxSubpassInputCounts, jsret, s.thisObject() /*ctx*/);
+    s.rval() = jsret;
+    SE_HOLD_RETURN_VALUE(cobj->maxSubpassInputCounts, s.thisObject(), s.rval());
+    return true;
+}
+SE_BIND_PROP_GET(js_gfx_BindingMappingInfo_get_maxSubpassInputCounts)
+
+static bool js_gfx_BindingMappingInfo_set_maxSubpassInputCounts(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    const auto& args = s.args();
+    auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_set_maxSubpassInputCounts : Invalid Native Object");
+
+    CC_UNUSED bool ok = true;
+    ok &= sevalue_to_native(args[0], &cobj->maxSubpassInputCounts, s.thisObject());
+    SE_PRECONDITION2(ok, false, "js_gfx_BindingMappingInfo_set_maxSubpassInputCounts : Error processing new value");
+    return true;
+}
+SE_BIND_PROP_SET(js_gfx_BindingMappingInfo_set_maxSubpassInputCounts)
+
+static bool js_gfx_BindingMappingInfo_get_setIndices(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_get_setIndices : Invalid Native Object");
+
+    CC_UNUSED bool ok = true;
+    se::Value jsret;
+    ok &= nativevalue_to_se(cobj->setIndices, jsret, s.thisObject() /*ctx*/);
+    s.rval() = jsret;
+    SE_HOLD_RETURN_VALUE(cobj->setIndices, s.thisObject(), s.rval());
+    return true;
+}
+SE_BIND_PROP_GET(js_gfx_BindingMappingInfo_get_setIndices)
+
+static bool js_gfx_BindingMappingInfo_set_setIndices(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    const auto& args = s.args();
+    auto* cobj = SE_THIS_OBJECT<cc::gfx::BindingMappingInfo>(s);
+    SE_PRECONDITION2(cobj, false, "js_gfx_BindingMappingInfo_set_setIndices : Invalid Native Object");
+
+    CC_UNUSED bool ok = true;
+    ok &= sevalue_to_native(args[0], &cobj->setIndices, s.thisObject());
+    SE_PRECONDITION2(ok, false, "js_gfx_BindingMappingInfo_set_setIndices : Error processing new value");
+    return true;
+}
+SE_BIND_PROP_SET(js_gfx_BindingMappingInfo_set_setIndices)
 
 
 template<>
@@ -3639,17 +3799,37 @@ bool sevalue_to_native(const se::Value &from, cc::gfx::BindingMappingInfo * to, 
     }
     se::Value field;
     bool ok = true;
-    json->getProperty("bufferOffsets", &field);
+    json->getProperty("maxBlockCounts", &field);
     if(!field.isNullOrUndefined()) {
-        ok &= sevalue_to_native(field, &(to->bufferOffsets), ctx);
+        ok &= sevalue_to_native(field, &(to->maxBlockCounts), ctx);
     }
-    json->getProperty("samplerOffsets", &field);
+    json->getProperty("maxSamplerTextureCounts", &field);
     if(!field.isNullOrUndefined()) {
-        ok &= sevalue_to_native(field, &(to->samplerOffsets), ctx);
+        ok &= sevalue_to_native(field, &(to->maxSamplerTextureCounts), ctx);
     }
-    json->getProperty("flexibleSet", &field);
+    json->getProperty("maxSamplerCounts", &field);
     if(!field.isNullOrUndefined()) {
-        ok &= sevalue_to_native(field, &(to->flexibleSet), ctx);
+        ok &= sevalue_to_native(field, &(to->maxSamplerCounts), ctx);
+    }
+    json->getProperty("maxTextureCounts", &field);
+    if(!field.isNullOrUndefined()) {
+        ok &= sevalue_to_native(field, &(to->maxTextureCounts), ctx);
+    }
+    json->getProperty("maxBufferCounts", &field);
+    if(!field.isNullOrUndefined()) {
+        ok &= sevalue_to_native(field, &(to->maxBufferCounts), ctx);
+    }
+    json->getProperty("maxImageCounts", &field);
+    if(!field.isNullOrUndefined()) {
+        ok &= sevalue_to_native(field, &(to->maxImageCounts), ctx);
+    }
+    json->getProperty("maxSubpassInputCounts", &field);
+    if(!field.isNullOrUndefined()) {
+        ok &= sevalue_to_native(field, &(to->maxSubpassInputCounts), ctx);
+    }
+    json->getProperty("setIndices", &field);
+    if(!field.isNullOrUndefined()) {
+        ok &= sevalue_to_native(field, &(to->setIndices), ctx);
     }
     return ok;
 }
@@ -3690,13 +3870,28 @@ static bool js_gfx_BindingMappingInfo_constructor(se::State& s) // NOLINT(readab
 
     cc::gfx::BindingMappingInfo* cobj = JSB_ALLOC(cc::gfx::BindingMappingInfo);
     if (argc > 0 && !args[0].isUndefined()) {
-        ok &= sevalue_to_native(args[0], &(cobj->bufferOffsets), nullptr);
+        ok &= sevalue_to_native(args[0], &(cobj->maxBlockCounts), nullptr);
     }
     if (argc > 1 && !args[1].isUndefined()) {
-        ok &= sevalue_to_native(args[1], &(cobj->samplerOffsets), nullptr);
+        ok &= sevalue_to_native(args[1], &(cobj->maxSamplerTextureCounts), nullptr);
     }
     if (argc > 2 && !args[2].isUndefined()) {
-        ok &= sevalue_to_native(args[2], &(cobj->flexibleSet), nullptr);
+        ok &= sevalue_to_native(args[2], &(cobj->maxSamplerCounts), nullptr);
+    }
+    if (argc > 3 && !args[3].isUndefined()) {
+        ok &= sevalue_to_native(args[3], &(cobj->maxTextureCounts), nullptr);
+    }
+    if (argc > 4 && !args[4].isUndefined()) {
+        ok &= sevalue_to_native(args[4], &(cobj->maxBufferCounts), nullptr);
+    }
+    if (argc > 5 && !args[5].isUndefined()) {
+        ok &= sevalue_to_native(args[5], &(cobj->maxImageCounts), nullptr);
+    }
+    if (argc > 6 && !args[6].isUndefined()) {
+        ok &= sevalue_to_native(args[6], &(cobj->maxSubpassInputCounts), nullptr);
+    }
+    if (argc > 7 && !args[7].isUndefined()) {
+        ok &= sevalue_to_native(args[7], &(cobj->setIndices), nullptr);
     }
 
     if(!ok) {
@@ -3730,9 +3925,14 @@ bool js_register_gfx_BindingMappingInfo(se::Object* obj) // NOLINT(readability-i
 {
     auto* cls = se::Class::create("BindingMappingInfo", obj, nullptr, _SE(js_gfx_BindingMappingInfo_constructor));
 
-    cls->defineProperty("bufferOffsets", _SE(js_gfx_BindingMappingInfo_get_bufferOffsets), _SE(js_gfx_BindingMappingInfo_set_bufferOffsets));
-    cls->defineProperty("samplerOffsets", _SE(js_gfx_BindingMappingInfo_get_samplerOffsets), _SE(js_gfx_BindingMappingInfo_set_samplerOffsets));
-    cls->defineProperty("flexibleSet", _SE(js_gfx_BindingMappingInfo_get_flexibleSet), _SE(js_gfx_BindingMappingInfo_set_flexibleSet));
+    cls->defineProperty("maxBlockCounts", _SE(js_gfx_BindingMappingInfo_get_maxBlockCounts), _SE(js_gfx_BindingMappingInfo_set_maxBlockCounts));
+    cls->defineProperty("maxSamplerTextureCounts", _SE(js_gfx_BindingMappingInfo_get_maxSamplerTextureCounts), _SE(js_gfx_BindingMappingInfo_set_maxSamplerTextureCounts));
+    cls->defineProperty("maxSamplerCounts", _SE(js_gfx_BindingMappingInfo_get_maxSamplerCounts), _SE(js_gfx_BindingMappingInfo_set_maxSamplerCounts));
+    cls->defineProperty("maxTextureCounts", _SE(js_gfx_BindingMappingInfo_get_maxTextureCounts), _SE(js_gfx_BindingMappingInfo_set_maxTextureCounts));
+    cls->defineProperty("maxBufferCounts", _SE(js_gfx_BindingMappingInfo_get_maxBufferCounts), _SE(js_gfx_BindingMappingInfo_set_maxBufferCounts));
+    cls->defineProperty("maxImageCounts", _SE(js_gfx_BindingMappingInfo_get_maxImageCounts), _SE(js_gfx_BindingMappingInfo_set_maxImageCounts));
+    cls->defineProperty("maxSubpassInputCounts", _SE(js_gfx_BindingMappingInfo_get_maxSubpassInputCounts), _SE(js_gfx_BindingMappingInfo_set_maxSubpassInputCounts));
+    cls->defineProperty("setIndices", _SE(js_gfx_BindingMappingInfo_get_setIndices), _SE(js_gfx_BindingMappingInfo_set_setIndices));
     cls->defineFinalizeFunction(_SE(js_cc_gfx_BindingMappingInfo_finalize));
     cls->install();
     JSBClassType::registerClass<cc::gfx::BindingMappingInfo>(cls);
@@ -20661,6 +20861,28 @@ static bool js_gfx_Device_getDeviceName(se::State& s) // NOLINT(readability-iden
 }
 SE_BIND_PROP_GET(js_gfx_Device_getDeviceName)
 
+static bool js_gfx_Device_getFormatFeatures(se::State& s) // NOLINT(readability-identifier-naming)
+{
+    auto* cobj = SE_THIS_OBJECT<cc::gfx::Device>(s);
+    SE_PRECONDITION2(cobj, false, "js_gfx_Device_getFormatFeatures : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        HolderType<cc::gfx::Format, false> arg0 = {};
+        ok &= sevalue_to_native(args[0], &arg0, s.thisObject());
+        SE_PRECONDITION2(ok, false, "js_gfx_Device_getFormatFeatures : Error processing arguments");
+        auto result = static_cast<int>(cobj->getFormatFeatures(arg0.value()));
+        ok &= nativevalue_to_se(result, s.rval(), nullptr /*ctx*/);
+        SE_PRECONDITION2(ok, false, "js_gfx_Device_getFormatFeatures : Error processing arguments");
+        SE_HOLD_RETURN_VALUE(result, s.thisObject(), s.rval());
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    return false;
+}
+SE_BIND_FUNC(js_gfx_Device_getFormatFeatures)
+
 static bool js_gfx_Device_getGfxAPI(se::State& s) // NOLINT(readability-identifier-naming)
 {
     auto* cobj = SE_THIS_OBJECT<cc::gfx::Device>(s);
@@ -21009,6 +21231,7 @@ bool js_register_gfx_Device(se::Object* obj) // NOLINT(readability-identifier-na
     cls->defineFunction("createSwapchain", _SE(js_gfx_Device_createSwapchain));
     cls->defineFunction("destroy", _SE(js_gfx_Device_destroy));
     cls->defineFunction("flushCommands", _SE(js_gfx_Device_flushCommands));
+    cls->defineFunction("getFormatFeatures", _SE(js_gfx_Device_getFormatFeatures));
     cls->defineFunction("getGlobalBarrier", _SE(js_gfx_Device_getGlobalBarrier));
     cls->defineFunction("getQueryPool", _SE(js_gfx_Device_getQueryPool));
     cls->defineFunction("getQueryPoolResults", _SE(js_gfx_Device_getQueryPoolResults));

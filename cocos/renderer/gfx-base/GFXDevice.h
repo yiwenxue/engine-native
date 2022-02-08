@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2019-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2019-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -104,7 +104,8 @@ public:
     inline const String &    getDeviceName() const { return _deviceName; }
     inline const String &    getRenderer() const { return _renderer; }
     inline const String &    getVendor() const { return _vendor; }
-    inline bool              hasFeature(Feature feature) const { return _features[static_cast<uint32_t>(feature)]; }
+    inline bool              hasFeature(Feature feature) const { return _features[toNumber(feature)]; }
+    inline FormatFeature     getFormatFeatures(Format format) const { return _formatFeatures[toNumber(format)]; }
 
     inline const BindingMappingInfo &bindingMappingInfo() const { return _bindingMappingInfo; }
 
@@ -159,7 +160,8 @@ protected:
     DeviceCaps         _caps;
     BindingMappingInfo _bindingMappingInfo;
 
-    std::array<bool, static_cast<size_t>(Feature::COUNT)> _features;
+    std::array<bool, static_cast<size_t>(Feature::COUNT)>         _features;
+    std::array<FormatFeature, static_cast<size_t>(Format::COUNT)> _formatFeatures;
 
     Queue *        _queue{nullptr};
     QueryPool *    _queryPool{nullptr};

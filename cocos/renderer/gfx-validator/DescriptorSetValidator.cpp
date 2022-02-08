@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2020-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2020-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -24,6 +24,7 @@
 ****************************************************************************/
 
 #include "base/CoreStd.h"
+#include "base/Log.h"
 #include "base/threading/MessageQueue.h"
 
 #include "BufferValidator.h"
@@ -70,6 +71,28 @@ void DescriptorSetValidator::doDestroy() {
 
 void DescriptorSetValidator::update() {
     CCASSERT(isInited(), "alread destroyed?");
+
+    const auto descriptorCount = _textures.size();
+
+    Texture *texture = nullptr;
+    Sampler *sampler = nullptr;
+    Format   format  = {};
+
+    for (size_t i = 0; i < descriptorCount; ++i) {
+        texture = _textures[i];
+        sampler = _samplers[i];
+        if (texture == nullptr || sampler == nullptr) continue;
+        format = texture->getInfo().format;
+
+        if (sampler->getInfo().magFilter == Filter::LINEAR ||
+            sampler->getInfo().mipFilter == Filter::LINEAR ||
+            sampler->getInfo().minFilter == Filter::LINEAR) {
+            auto feature = DeviceValidator::getInstance()->getFormatFeatures(format);
+            if (!hasFlag(DeviceValidator::getInstance()->getFormatFeatures(format), FormatFeature::LINEAR_FILTER)) {
+                CC_LOG_WARNING("[WARNING]: Format doesn't support linear filter.");
+            }
+        }
+    }
 
     if (!_isDirty) return;
 

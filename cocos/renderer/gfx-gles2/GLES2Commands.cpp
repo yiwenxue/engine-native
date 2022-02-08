@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2019-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2019-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -27,6 +27,7 @@
 
 #include "GLES2Commands.h"
 #include "GLES2Device.h"
+#include "gfx-gles-common/GLESCommandPool.h"
 
 #define BUFFER_OFFSET(idx) (static_cast<char *>(0) + (idx))
 
@@ -53,7 +54,6 @@ GLenum mapGLFormat(Format format) {
         case Format::RGB8SN:
         case Format::RGB16F:
         case Format::RGB32F:
-        case Format::R11G11B10F:
         case Format::R5G6B5:
         case Format::SRGB8: return GL_RGB;
         case Format::RGBA8:
@@ -78,8 +78,6 @@ GLenum mapGLFormat(Format format) {
         case Format::BC3_SRGB: return GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
 
         case Format::ETC_RGB8: return GL_ETC1_RGB8_OES;
-        case Format::ETC2_RGB8: return GL_COMPRESSED_RGB8_ETC2;
-        case Format::ETC2_RGBA8: return GL_COMPRESSED_RGBA8_ETC2_EAC;
 
         case Format::PVRTC_RGB2: return GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG;
         case Format::PVRTC_RGBA2: return GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
@@ -126,10 +124,8 @@ GLenum mapGLFormat(Format format) {
 GLenum mapGLInternalFormat(Format format) {
     switch (format) {
         case Format::R8: return GL_R8_EXT;
-        case Format::R8SN: return GL_R8_SNORM;
-        case Format::RG8SN: return GL_RG8_SNORM;
+        case Format::RG8: return GL_RG8_EXT;
         case Format::SRGB8: return GL_SRGB_EXT;
-        case Format::RGBA8SN: return GL_RGBA8_SNORM;
         case Format::SRGB8_A8: return GL_SRGB_ALPHA_EXT;
         case Format::R16F: return GL_R16F_EXT;
         case Format::RG16F: return GL_RG16F_EXT;
@@ -256,7 +252,6 @@ GLenum formatToGLType(Format format) {
         case Format::R5G6B5: return GL_UNSIGNED_SHORT_5_6_5;
         case Format::RGB5A1: return GL_UNSIGNED_SHORT_5_5_5_1;
         case Format::RGBA4: return GL_UNSIGNED_SHORT_4_4_4_4;
-        case Format::R11G11B10F: return GL_FLOAT;
         case Format::RGB9E5: return GL_FLOAT;
 
         case Format::DEPTH: return GL_UNSIGNED_SHORT;
@@ -278,11 +273,6 @@ GLenum formatToGLType(Format format) {
         case Format::BC7_SRGB:
 
         case Format::ETC_RGB8:
-        case Format::ETC2_RGB8:
-        case Format::ETC2_RGBA8:
-        case Format::ETC2_SRGB8:
-        case Format::ETC2_RGB8_A1:
-        case Format::ETC2_SRGB8_A1:
         case Format::EAC_R11: return GL_UNSIGNED_BYTE;
         case Format::EAC_R11SN: return GL_BYTE;
         case Format::EAC_RG11: return GL_UNSIGNED_BYTE;
@@ -609,7 +599,7 @@ void cmdFuncGLES2CreateTexture(GLES2Device *device, GLES2GPUTexture *gpuTexture)
         return;
     }
 
-    if (gpuTexture->glSamples > 1 || hasAllFlags(TextureUsage::COLOR_ATTACHMENT | TextureUsage::DEPTH_STENCIL_ATTACHMENT, gpuTexture->usage)) {
+    if (!device->isTextureExclusive(gpuTexture->format) && (gpuTexture->glSamples > 1 || hasAllFlags(TextureUsage::COLOR_ATTACHMENT | TextureUsage::DEPTH_STENCIL_ATTACHMENT, gpuTexture->usage))) {
         gpuTexture->glInternalFmt = mapGLInternalFormat(gpuTexture->format);
         switch (gpuTexture->type) {
             case TextureType::TEX2D: {
@@ -1100,14 +1090,14 @@ void cmdFuncGLES2CreateShader(GLES2Device *device, GLES2GPUShader *gpuShader) {
     // texture unit index mapping optimization
     vector<GLES2GPUUniformSamplerTexture> glActiveSamplerTextures;
     vector<GLint>                         glActiveSamplerLocations;
-    const BindingMappingInfo &            bindingMappingInfo = device->bindingMappingInfo();
-    unordered_map<String, uint32_t> &     texUnitCacheMap    = device->stateCache()->texUnitCacheMap;
+    const GLESBindingMapping &            bindingMappings = device->bindingMappings();
+    unordered_map<String, uint32_t> &     texUnitCacheMap = device->stateCache()->texUnitCacheMap;
 
     // sampler bindings in the flexible set comes strictly after buffer bindings
     // so we need to subtract the buffer count for these samplers
     uint32_t flexibleSetBaseOffset = 0U;
-    for (auto &block : gpuShader->blocks) {
-        if (block.set == bindingMappingInfo.flexibleSet) {
+    for (const auto &block : gpuShader->blocks) {
+        if (block.set == bindingMappings.flexibleSet) {
             flexibleSetBaseOffset++;
         }
     }
@@ -1122,8 +1112,8 @@ void cmdFuncGLES2CreateShader(GLES2Device *device, GLES2GPUShader *gpuShader) {
             glActiveSamplerLocations.push_back(glLoc);
         }
         if (!texUnitCacheMap.count(samplerTexture.name)) {
-            uint32_t binding = samplerTexture.binding + bindingMappingInfo.samplerOffsets[samplerTexture.set] + arrayOffset;
-            if (samplerTexture.set == bindingMappingInfo.flexibleSet) binding -= flexibleSetBaseOffset;
+            uint32_t binding = samplerTexture.binding + bindingMappings.samplerTextureOffsets[samplerTexture.set] + arrayOffset;
+            if (samplerTexture.set == bindingMappings.flexibleSet) binding -= flexibleSetBaseOffset;
             texUnitCacheMap[samplerTexture.name] = binding % device->getCapabilities().maxTextureUnits;
             arrayOffset += samplerTexture.count - 1;
         }
@@ -2068,8 +2058,8 @@ void cmdFuncGLES2BindState(GLES2Device *device, GLES2GPUPipelineState *gpuPipeli
             const GLES2GPUDescriptor &   gpuDescriptor    = gpuDescriptorSet->gpuDescriptors[descriptorIndex];
 
             if (!gpuDescriptor.gpuBuffer && !gpuDescriptor.gpuBufferView) {
-                //CC_LOG_ERROR("Buffer binding '%s' at set %d binding %d is not bounded",
-                //             glBlock.name.c_str(), glBlock.set, glBlock.binding);
+                // CC_LOG_ERROR("Buffer binding '%s' at set %d binding %d is not bounded",
+                //              glBlock.name.c_str(), glBlock.set, glBlock.binding);
                 continue;
             }
 
@@ -2191,8 +2181,8 @@ void cmdFuncGLES2BindState(GLES2Device *device, GLES2GPUPipelineState *gpuPipeli
                 auto unit = static_cast<uint32_t>(glSamplerTexture.units[u]);
 
                 if (!gpuDescriptor->gpuTexture || !gpuDescriptor->gpuSampler) {
-                    //CC_LOG_ERROR("Sampler texture '%s' at set %d binding %d index %d is not bounded",
-                    //             glSamplerTexture.name.c_str(), glSamplerTexture.set, glSamplerTexture.binding, u);
+                    // CC_LOG_ERROR("Sampler texture '%s' at set %d binding %d index %d is not bounded",
+                    //              glSamplerTexture.name.c_str(), glSamplerTexture.set, glSamplerTexture.binding, u);
                     continue;
                 }
 

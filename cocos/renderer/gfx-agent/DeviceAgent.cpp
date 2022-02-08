@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2020-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2020-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -79,6 +79,7 @@ bool DeviceAgent::doInit(const DeviceInfo &info) {
     _vendor     = _actor->getVendor();
     _caps       = _actor->_caps;
     memcpy(_features.data(), _actor->_features.data(), static_cast<uint32_t>(Feature::COUNT) * sizeof(bool));
+    memcpy(_formatFeatures.data(), _actor->_formatFeatures.data(), static_cast<uint32_t>(Format::COUNT) * sizeof(FormatFeatureBit));
 
     // NOTE: C++17 is required when enable alignment
     // TODO(PatriceJiang): replace with: _mainMessageQueue = CC_NEW(MessageQueue);
@@ -276,7 +277,7 @@ TextureBarrier *DeviceAgent::getTextureBarrier(const TextureBarrierInfo &info) {
     return _actor->getTextureBarrier(info);
 }
 
-template<typename T>
+template <typename T>
 void doBufferTextureCopy(const uint8_t *const *buffers, Texture *texture, const BufferTextureCopy *regions, uint32_t count, MessageQueue *mq, T *actor) {
     uint32_t bufferCount = 0U;
     for (uint32_t i = 0U; i < count; i++) {

@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2020-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2020-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -25,9 +25,9 @@
 
 #pragma once
 
+#include <cstring>
 #include "VKStd.h"
 #include "gfx-base/GFXDevice.h"
-#include <cstring>
 
 namespace cc {
 namespace gfx {
@@ -131,8 +131,7 @@ protected:
     void copyTextureToBuffers(Texture *src, uint8_t *const *buffers, const BufferTextureCopy *region, uint32_t count) override;
     void getQueryPoolResults(QueryPool *queryPool) override;
 
-    void destroySwapchain();
-    bool checkSwapchainStatus();
+    void initFormatFeature();
 
     CCVKGPUDevice *       _gpuDevice  = nullptr;
     CCVKGPUContext *      _gpuContext = nullptr;

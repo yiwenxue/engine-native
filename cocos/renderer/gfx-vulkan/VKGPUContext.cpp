@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2020-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2020-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -36,7 +36,7 @@ constexpr uint32_t FORCE_MINOR_VERSION = 0; // 0 for default version, otherwise 
 #define FORCE_DISABLE_VALIDATION 1
 
 #if CC_DEBUG > 0 && !FORCE_DISABLE_VALIDATION || FORCE_ENABLE_VALIDATION
-constexpr uint32_t DISABLE_VALIDATION_ASSERTIONS = 1; // 0 for default behavior, otherwise assertions will be disabled
+constexpr uint32_t             DISABLE_VALIDATION_ASSERTIONS = 1; // 0 for default behavior, otherwise assertions will be disabled
 VKAPI_ATTR VkBool32 VKAPI_CALL debugUtilsMessengerCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                                                            VkDebugUtilsMessageTypeFlagsEXT /*messageType*/,
                                                            const VkDebugUtilsMessengerCallbackDataEXT *callbackData,
@@ -96,7 +96,8 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(VkDebugReportFlagsEXT flags,
 bool CCVKGPUContext::initialize() {
     // only enable the absolute essentials
     vector<const char *> requestedLayers{
-        "VK_LAYER_KHRONOS_synchronization2"};
+        //"VK_LAYER_KHRONOS_synchronization2",
+    };
     vector<const char *> requestedExtensions{
         VK_KHR_SURFACE_EXTENSION_NAME,
     };

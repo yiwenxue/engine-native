@@ -25,6 +25,7 @@
 
 #include "DeferredPipeline.h"
 #include "../SceneCulling.h"
+#include "../helper/Utils.h"
 #include "../shadow/ShadowFlow.h"
 #include "MainFlow.h"
 #include "gfx-base/GFXBuffer.h"
@@ -34,7 +35,6 @@
 #include "gfx-base/GFXDevice.h"
 #include "gfx-base/GFXSwapchain.h"
 #include "gfx-base/states/GFXTextureBarrier.h"
-#include "../helper/Utils.h"
 
 namespace cc {
 namespace pipeline {
@@ -50,7 +50,6 @@ namespace pipeline {
 
 framegraph::StringHandle DeferredPipeline::fgStrHandleGbufferTexture[GBUFFER_COUNT] = {
     framegraph::FrameGraph::stringToHandle("gbufferAlbedoTexture"),
-    framegraph::FrameGraph::stringToHandle("gbufferPositionTexture"),
     framegraph::FrameGraph::stringToHandle("gbufferNormalTexture"),
     framegraph::FrameGraph::stringToHandle("gbufferEmissiveTexture")};
 
@@ -150,8 +149,7 @@ bool DeferredPipeline::activeRenderer(gfx::Swapchain *swapchain) {
 
     // update global defines when all states initialized.
     _macros.setValue("CC_USE_HDR", static_cast<bool>(sharedData->isHDR));
-    _macros.setValue("CC_SUPPORT_FLOAT_TEXTURE", _device->hasFeature(gfx::Feature::TEXTURE_FLOAT));
-
+    _macros.setValue("CC_SUPPORT_FLOAT_TEXTURE", hasAnyFlags(_device->getFormatFeatures(gfx::Format::RGBA32F), gfx::FormatFeature::RENDER_TARGET | gfx::FormatFeature::SAMPLED_TEXTURE));
     // step 2 create index buffer
     uint ibStride = 4;
     uint ibSize   = ibStride * 6;

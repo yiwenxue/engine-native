@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2020-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2020-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -25,11 +25,11 @@
 
 #include "ForwardPipeline.h"
 #include "../SceneCulling.h"
+#include "../helper/Utils.h"
 #include "../shadow/ShadowFlow.h"
 #include "ForwardFlow.h"
 #include "gfx-base/GFXDevice.h"
 #include "scene/RenderScene.h"
-#include "../helper/Utils.h"
 
 namespace cc {
 namespace pipeline {
@@ -136,7 +136,7 @@ bool ForwardPipeline::activeRenderer(gfx::Swapchain *swapchain) {
 
     // update global defines when all states initialized.
     _macros.setValue("CC_USE_HDR", static_cast<bool>(sharedData->isHDR));
-    _macros.setValue("CC_SUPPORT_FLOAT_TEXTURE", _device->hasFeature(gfx::Feature::TEXTURE_FLOAT));
+    _macros.setValue("CC_SUPPORT_FLOAT_TEXTURE", hasAnyFlags(_device->getFormatFeatures(gfx::Format::RGBA32F), gfx::FormatFeature::RENDER_TARGET | gfx::FormatFeature::SAMPLED_TEXTURE));
 
     // step 2 create index buffer
     uint ibStride = 4;

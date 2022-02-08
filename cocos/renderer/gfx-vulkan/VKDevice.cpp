@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2020-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2020-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -40,6 +40,7 @@
 #include "VKSwapchain.h"
 #include "VKTexture.h"
 #include "VKUtils.h"
+#include "base/Utils.h"
 #include "states/VKGlobalBarrier.h"
 #include "states/VKSampler.h"
 #include "states/VKTextureBarrier.h"
@@ -227,20 +228,32 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
     };
     findPreferredDepthFormat(depthStencilFormatPriorityList, 3, &_gpuDevice->depthStencilFormat);
 
-    _features[toNumber(Feature::COLOR_FLOAT)]               = true;
-    _features[toNumber(Feature::COLOR_HALF_FLOAT)]          = true;
-    _features[toNumber(Feature::TEXTURE_FLOAT)]             = true;
-    _features[toNumber(Feature::TEXTURE_HALF_FLOAT)]        = true;
-    _features[toNumber(Feature::TEXTURE_FLOAT_LINEAR)]      = true;
-    _features[toNumber(Feature::TEXTURE_HALF_FLOAT_LINEAR)] = true;
-    _features[toNumber(Feature::FORMAT_R11G11B10F)]         = true;
-    _features[toNumber(Feature::FORMAT_SRGB)]               = true;
-    _features[toNumber(Feature::ELEMENT_INDEX_UINT)]        = true;
-    _features[toNumber(Feature::INSTANCED_ARRAYS)]          = true;
-    _features[toNumber(Feature::MULTIPLE_RENDER_TARGETS)]   = true;
-    _features[toNumber(Feature::BLEND_MINMAX)]              = true;
-    _features[toNumber(Feature::COMPUTE_SHADER)]            = true;
-    _features[toNumber(Feature::INPUT_ATTACHMENT_BENEFIT)]  = true;
+    _features[toNumber(Feature::ELEMENT_INDEX_UINT)]       = true;
+    _features[toNumber(Feature::INSTANCED_ARRAYS)]         = true;
+    _features[toNumber(Feature::MULTIPLE_RENDER_TARGETS)]  = true;
+    _features[toNumber(Feature::BLEND_MINMAX)]             = true;
+    _features[toNumber(Feature::COMPUTE_SHADER)]           = true;
+    _features[toNumber(Feature::INPUT_ATTACHMENT_BENEFIT)] = true;
+
+    initFormatFeature();
+
+    String compressedFmts;
+
+    if (getFormatFeatures(Format::BC1_SRGB_ALPHA) != FormatFeature::NONE) {
+        compressedFmts += "dxt ";
+    }
+
+    if (getFormatFeatures(Format::ETC2_RGBA8) != FormatFeature::NONE) {
+        compressedFmts += "etc2 ";
+    }
+
+    if (getFormatFeatures(Format::ASTC_RGBA_4X4) != FormatFeature::NONE) {
+        compressedFmts += "astc ";
+    }
+
+    if (getFormatFeatures(Format::PVRTC_RGBA2) != FormatFeature::NONE) {
+        compressedFmts += "pvrtc ";
+    }
 
     _gpuDevice->useMultiDrawIndirect        = deviceFeatures.multiDrawIndirect;
     _gpuDevice->useDescriptorUpdateTemplate = _gpuDevice->minorVersion > 0 || checkExtension(VK_KHR_DESCRIPTOR_UPDATE_TEMPLATE_EXTENSION_NAME);
@@ -251,24 +264,6 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
         _gpuDevice->createRenderPass2 = vkCreateRenderPass2KHR;
     } else {
         _gpuDevice->createRenderPass2 = vkCreateRenderPass2KHRFallback;
-    }
-
-    if (isFormatSupported(_gpuContext->physicalDevice, VK_FORMAT_R8G8B8_UNORM)) {
-        _features[toNumber(Feature::FORMAT_RGB8)] = true;
-    }
-
-    String compressedFmts;
-    if (isFormatSupported(_gpuContext->physicalDevice, VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK)) {
-        _features[toNumber(Feature::FORMAT_ETC2)] = true;
-        compressedFmts += "etc2 ";
-    }
-    if (isFormatSupported(_gpuContext->physicalDevice, VK_FORMAT_PVRTC1_2BPP_UNORM_BLOCK_IMG)) {
-        _features[toNumber(Feature::FORMAT_PVRTC)] = true;
-        compressedFmts += "pvrtc ";
-    }
-    if (isFormatSupported(_gpuContext->physicalDevice, VK_FORMAT_ASTC_4x4_UNORM_BLOCK)) {
-        _features[toNumber(Feature::FORMAT_ASTC)] = true;
-        compressedFmts += "astc ";
     }
 
     const VkPhysicalDeviceLimits &limits = _gpuContext->physicalDeviceProperties.limits;
@@ -283,7 +278,7 @@ bool CCVKDevice::doInit(const DeviceInfo & /*info*/) {
     _caps.maxVertexTextureUnits          = limits.maxPerStageDescriptorSampledImages;
     _caps.maxTextureSize                 = limits.maxImageDimension2D;
     _caps.maxCubeMapTextureSize          = limits.maxImageDimensionCube;
-    _caps.uboOffsetAlignment             = static_cast<uint32_t>(limits.minUniformBufferOffsetAlignment);
+    _caps.uboOffsetAlignment             = utils::toUint(limits.minUniformBufferOffsetAlignment);
     // compute shaders
     _caps.maxComputeSharedMemorySize     = limits.maxComputeSharedMemorySize;
     _caps.maxComputeWorkGroupInvocations = limits.maxComputeWorkGroupInvocations;
@@ -597,8 +592,9 @@ void CCVKDevice::acquire(Swapchain *const *swapchains, uint32_t count) {
 
     for (uint32_t i = 0; i < vkSwapchains.size(); ++i) {
         VkSemaphore acquireSemaphore = _gpuSemaphorePool->alloc();
-        VK_CHECK(vkAcquireNextImageKHR(_gpuDevice->vkDevice, vkSwapchains[i], ~0ULL,
-                                       acquireSemaphore, VK_NULL_HANDLE, &vkSwapchainIndices[i]));
+        VkResult    res              = vkAcquireNextImageKHR(_gpuDevice->vkDevice, vkSwapchains[i], ~0ULL,
+                                             acquireSemaphore, VK_NULL_HANDLE, &vkSwapchainIndices[i]);
+        CCASSERT(res == VK_SUCCESS || res == VK_SUBOPTIMAL_KHR, "acquire surface failed");
         gpuSwapchains[i]->curImageIndex = vkSwapchainIndices[i];
         queue->gpuQueue()->lastSignaledSemaphores.push_back(acquireSemaphore);
 
@@ -680,6 +676,44 @@ void CCVKDevice::waitAllFences() {
 
         for (auto *fencePool : _gpuFencePools) {
             fencePool->reset();
+        }
+    }
+}
+
+void CCVKDevice::initFormatFeature() {
+    const auto           formatLen     = static_cast<size_t>(Format::COUNT);
+    VkFormatProperties   properties    = {};
+    VkFormat             format        = {};
+    VkFormatFeatureFlags formatFeature = {};
+    for (int i = toNumber(Format::R8); i < formatLen; ++i) {
+        if (static_cast<Format>(i) == Format::ETC_RGB8) continue;
+        format = mapVkFormat(static_cast<Format>(i), _gpuDevice);
+        vkGetPhysicalDeviceFormatProperties(_gpuContext->physicalDevice, format, &properties);
+
+        // render buffer support
+        formatFeature = VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT | VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        if (properties.optimalTilingFeatures & formatFeature) {
+            _formatFeatures[i] |= FormatFeature::RENDER_TARGET;
+        }
+        // texture storage support
+        formatFeature = VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT;
+        if (properties.linearTilingFeatures & formatFeature) {
+            _formatFeatures[i] |= FormatFeature::STORAGE_TEXTURE;
+        }
+        // sampled render target support
+        formatFeature = VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT;
+        if (properties.optimalTilingFeatures & formatFeature) {
+            _formatFeatures[i] |= FormatFeature::SAMPLED_TEXTURE;
+        }
+        // linear filter support
+        formatFeature = VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT;
+        if (properties.optimalTilingFeatures & formatFeature) {
+            _formatFeatures[i] |= FormatFeature::LINEAR_FILTER;
+        }
+        // vertex attribute support
+        formatFeature = VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT;
+        if (properties.bufferFeatures & formatFeature) {
+            _formatFeatures[i] |= FormatFeature::VERTEX_ATTRIBUTE;
         }
     }
 }

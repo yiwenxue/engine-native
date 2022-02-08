@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2020-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2020-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -292,7 +292,7 @@ void RenderPipeline::generateConstantMacros() {
 #define CC_PLATFORM_ANDROID_AND_WEBGL 0
 #define CC_ENABLE_WEBGL_HIGHP_STRUCT_VALUES 0
         )",
-        _device->hasFeature(gfx::Feature::TEXTURE_FLOAT) ? 1 : 0,
+        hasAnyFlags(_device->getFormatFeatures(gfx::Format::RGBA32F), gfx::FormatFeature::RENDER_TARGET | gfx::FormatFeature::SAMPLED_TEXTURE),
         _clusterEnabled ? 1 : 0,
         _device->getCapabilities().maxVertexUniformVectors,
         _device->getCapabilities().maxFragmentUniformVectors,

@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2019-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2019-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -70,18 +70,18 @@ void GLES3DescriptorSet::doDestroy() {
 
 void GLES3DescriptorSet::update() {
     if (_isDirty && _gpuDescriptorSet) {
-        const GLES3GPUDescriptorList &descriptors = _gpuDescriptorSet->gpuDescriptors;
+        auto &descriptors = _gpuDescriptorSet->gpuDescriptors;
         for (size_t i = 0; i < descriptors.size(); i++) {
             if (hasAnyFlags(descriptors[i].type, DESCRIPTOR_BUFFER_TYPE)) {
                 if (_buffers[i]) {
-                    _gpuDescriptorSet->gpuDescriptors[i].gpuBuffer = static_cast<GLES3Buffer *>(_buffers[i])->gpuBuffer();
+                    descriptors[i].gpuBuffer = static_cast<GLES3Buffer *>(_buffers[i])->gpuBuffer();
                 }
             } else if (hasAnyFlags(descriptors[i].type, DESCRIPTOR_TEXTURE_TYPE)) {
                 if (_textures[i]) {
-                    _gpuDescriptorSet->gpuDescriptors[i].gpuTextureView = static_cast<GLES3Texture *>(_textures[i])->gpuTextureView();
+                    descriptors[i].gpuTextureView = static_cast<GLES3Texture *>(_textures[i])->gpuTextureView();
                 }
                 if (_samplers[i]) {
-                    _gpuDescriptorSet->gpuDescriptors[i].gpuSampler = static_cast<GLES3Sampler *>(_samplers[i])->gpuSampler();
+                    descriptors[i].gpuSampler = static_cast<GLES3Sampler *>(_samplers[i])->gpuSampler();
                 }
             }
         }

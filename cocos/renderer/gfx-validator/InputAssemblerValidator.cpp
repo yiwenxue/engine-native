@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2020-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2020-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -47,6 +47,11 @@ InputAssemblerValidator::~InputAssemblerValidator() {
 void InputAssemblerValidator::doInit(const InputAssemblerInfo &info) {
     CCASSERT(!isInited(), "initializing twice?");
     _inited = true;
+
+    // vertex attributes validations
+    for (auto const &attribute : info.attributes) {
+        CCASSERT(hasFlag(DeviceValidator::getInstance()->getFormatFeatures(attribute.format), FormatFeature::VERTEX_ATTRIBUTE), "Format not supported for the specified features");
+    }
 
     for (auto *vertexBuffer : info.vertexBuffers) {
         CCASSERT(vertexBuffer && static_cast<BufferValidator *>(vertexBuffer)->isInited(), "already destroyed?");

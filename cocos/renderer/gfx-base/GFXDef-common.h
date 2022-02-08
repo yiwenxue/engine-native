@@ -1,5 +1,5 @@
 /****************************************************************************
- Copyright (c) 2019-2021 Xiamen Yaji Software Co., Ltd.
+ Copyright (c) 2019-2022 Xiamen Yaji Software Co., Ltd.
 
  http://www.cocos.com
 
@@ -123,6 +123,7 @@ enum class API : uint32_t {
     GLES3,
     METAL,
     VULKAN,
+    NVN,
     WEBGL,
     WEBGL2,
     WEBGPU,
@@ -138,20 +139,6 @@ enum class SurfaceTransform : uint32_t {
 CC_ENUM_CONVERSION_OPERATOR(SurfaceTransform);
 
 enum class Feature : uint32_t {
-    COLOR_FLOAT,
-    COLOR_HALF_FLOAT,
-    TEXTURE_FLOAT,
-    TEXTURE_HALF_FLOAT,
-    TEXTURE_FLOAT_LINEAR,
-    TEXTURE_HALF_FLOAT_LINEAR,
-    FORMAT_R11G11B10F,
-    FORMAT_SRGB,
-    FORMAT_ETC1,
-    FORMAT_ETC2,
-    FORMAT_DXT,
-    FORMAT_PVRTC,
-    FORMAT_ASTC,
-    FORMAT_RGB8,
     ELEMENT_INDEX_UINT,
     INSTANCED_ARRAYS,
     MULTIPLE_RENDER_TARGETS,
@@ -248,24 +235,24 @@ enum class Format : uint32_t {
     // Compressed Format
 
     // Block Compression Format, DDS (DirectDraw Surface)
-    // DXT1: 3 channels (5:6:5), 1/8 origianl size, with 0 or 1 bit of alpha
+    // DXT1: 3 channels (5:6:5), 1/8 original size, with 0 or 1 bit of alpha
     BC1,
     BC1_ALPHA,
     BC1_SRGB,
     BC1_SRGB_ALPHA,
-    // DXT3: 4 channels (5:6:5), 1/4 origianl size, with 4 bits of alpha
+    // DXT3: 4 channels (5:6:5), 1/4 original size, with 4 bits of alpha
     BC2,
     BC2_SRGB,
-    // DXT5: 4 channels (5:6:5), 1/4 origianl size, with 8 bits of alpha
+    // DXT5: 4 channels (5:6:5), 1/4 original size, with 8 bits of alpha
     BC3,
     BC3_SRGB,
-    // 1 channel (8), 1/4 origianl size
+    // 1 channel (8), 1/4 original size
     BC4,
     BC4_SNORM,
-    // 2 channels (8:8), 1/2 origianl size
+    // 2 channels (8:8), 1/2 original size
     BC5,
     BC5_SNORM,
-    // 3 channels (16:16:16), half-floating point, 1/6 origianl size
+    // 3 channels (16:16:16), half-floating point, 1/6 original size
     // UF16: unsigned float, 5 exponent bits + 11 mantissa bits
     // SF16: signed float, 1 signed bit + 5 exponent bits + 10 mantissa bits
     BC6H_UF16,
@@ -470,6 +457,17 @@ enum class TextureFlagBit : uint32_t {
 using TextureFlags = TextureFlagBit;
 CC_ENUM_BITWISE_OPERATORS(TextureFlagBit);
 
+enum class FormatFeatureBit : uint32_t {
+    NONE             = 0,
+    RENDER_TARGET    = 0x1,  // Allow usages as render pass attachments
+    SAMPLED_TEXTURE  = 0x2,  // Allow sampled reads in shaders
+    LINEAR_FILTER    = 0x4,  // Allow linear filtering when sampling in shaders or blitting
+    STORAGE_TEXTURE  = 0x8,  // Allow storage reads & writes in shaders
+    VERTEX_ATTRIBUTE = 0x10, // Allow usages as vertex input attributes
+};
+using FormatFeature = FormatFeatureBit;
+CC_ENUM_BITWISE_OPERATORS(FormatFeatureBit);
+
 enum class SampleCount : uint32_t {
     ONE,                  // Single sample
     MULTIPLE_PERFORMANCE, // Multiple samples prioritizing performance over quality
@@ -595,15 +593,15 @@ using ShaderStageFlags = ShaderStageFlagBit;
 CC_ENUM_BITWISE_OPERATORS(ShaderStageFlagBit);
 
 enum class LoadOp : uint32_t {
-    LOAD,    // Load the contents from the fbo from previous
-    CLEAR,   // Clear the fbo
-    DISCARD, // Ignore writing to the fbo and keep old data
+    LOAD,    // Load the previous content from memory
+    CLEAR,   // Clear the content to a fixed value
+    DISCARD, // Discard the previous content
 };
 CC_ENUM_CONVERSION_OPERATOR(LoadOp);
 
 enum class StoreOp : uint32_t {
-    STORE,   // Write the source to the destination
-    DISCARD, // Don't write the source to the destination
+    STORE,   // Store the pending content to memory
+    DISCARD, // Discard the pending content
 };
 CC_ENUM_CONVERSION_OPERATOR(StoreOp);
 
@@ -885,12 +883,22 @@ using ColorList = vector<Color>;
  * The GFX layer assumes the binding numbers for each descriptor type inside each set
  * are guaranteed to be consecutive, so the mapping procedure is reduced
  * to a simple shifting operation. This data structure specifies the
- * offsets for each descriptor type in each set.
+ * capacity for each descriptor type in each set.
+ *
+ * The `setIndices` field defines the binding ordering between different sets.
+ * The last set index is treated as the 'flexible set', whose capacity is dynamically
+ * assigned based on the total available descriptor slots on the runtime device.
  */
 struct BindingMappingInfo {
-    std::vector<int32_t> bufferOffsets;
-    std::vector<int32_t> samplerOffsets;
-    uint32_t             flexibleSet{0U};
+    std::vector<uint32_t> maxBlockCounts{0};
+    std::vector<uint32_t> maxSamplerTextureCounts{0};
+    std::vector<uint32_t> maxSamplerCounts{0};
+    std::vector<uint32_t> maxTextureCounts{0};
+    std::vector<uint32_t> maxBufferCounts{0};
+    std::vector<uint32_t> maxImageCounts{0};
+    std::vector<uint32_t> maxSubpassInputCounts{0};
+
+    std::vector<uint32_t> setIndices{0};
 };
 
 struct SwapchainInfo {
