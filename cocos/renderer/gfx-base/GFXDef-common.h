@@ -1140,6 +1140,9 @@ struct SubpassInfo {
     std::vector<uint32_t> resolves;
     std::vector<uint32_t> preserves;
 
+    // which views rendering is broadcast to
+    uint viewMask = INVALID_BINDING;
+
     uint32_t    depthStencil{INVALID_BINDING};
     uint32_t    depthStencilResolve{INVALID_BINDING};
     ResolveMode depthResolveMode{ResolveMode::NONE};
@@ -1158,6 +1161,8 @@ struct SubpassDependency {
 using SubpassDependencyList = vector<SubpassDependency>;
 
 struct RenderPassInfo {
+    // which views in the source subpass the views in the destination subpass depend on
+    uint                   viewOffset = 0U;
     ColorAttachmentList    colorAttachments;
     DepthStencilAttachment depthStencilAttachment;
     SubpassInfoList        subpasses;
@@ -1285,6 +1290,7 @@ struct PipelineStateInfo {
     DynamicStateFlags dynamicStates{DynamicStateFlagBit::NONE};
     PipelineBindPoint bindPoint{PipelineBindPoint::GRAPHICS};
     uint32_t          subpass{0U};
+    uint32_t          viewports{1U};
 };
 
 struct CommandBufferInfo {
@@ -1328,15 +1334,14 @@ struct DynamicStencilStates {
 };
 
 struct DynamicStates {
-    Viewport viewport;
-    Rect     scissor;
-    Color    blendConstant;
-    float    lineWidth{1.F};
-    float    depthBiasConstant{0.F};
-    float    depthBiasClamp{0.F};
-    float    depthBiasSlope{0.F};
-    float    depthMinBounds{0.F};
-    float    depthMaxBounds{0.F};
+    vector<Viewport> viewports;
+    Color            blendConstant;
+    float            lineWidth{1.F};
+    float            depthBiasConstant{0.F};
+    float            depthBiasClamp{0.F};
+    float            depthBiasSlope{0.F};
+    float            depthMinBounds{0.F};
+    float            depthMaxBounds{0.F};
 
     DynamicStencilStates stencilStatesFront;
     DynamicStencilStates stencilStatesBack;

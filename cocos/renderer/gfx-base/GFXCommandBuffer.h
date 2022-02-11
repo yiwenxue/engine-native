@@ -48,8 +48,7 @@ public:
     virtual void bindPipelineState(PipelineState *pso)                                                                                                                                                                = 0;
     virtual void bindDescriptorSet(uint32_t set, DescriptorSet *descriptorSet, uint32_t dynamicOffsetCount, const uint32_t *dynamicOffsets)                                                                           = 0;
     virtual void bindInputAssembler(InputAssembler *ia)                                                                                                                                                               = 0;
-    virtual void setViewport(const Viewport &vp)                                                                                                                                                                      = 0;
-    virtual void setScissor(const Rect &rect)                                                                                                                                                                         = 0;
+    virtual void setViewports(const Viewport *vp, uint count)                                                                                                                                                         = 0;
     virtual void setLineWidth(float width)                                                                                                                                                                            = 0;
     virtual void setDepthBias(float constant, float clamp, float slope)                                                                                                                                               = 0;
     virtual void setBlendConstants(const Color &constants)                                                                                                                                                            = 0;
@@ -79,6 +78,8 @@ public:
 
     inline void bindDescriptorSet(uint32_t set, DescriptorSet *descriptorSet);
     inline void bindDescriptorSet(uint32_t set, DescriptorSet *descriptorSet, const vector<uint32_t> &dynamicOffsets);
+
+    inline void setViewport(const Viewport &vp) { setViewports(&vp, 1); }
 
     inline void beginRenderPass(RenderPass *renderPass, Framebuffer *fbo, const Rect &renderArea, const ColorList &colors, float depth, uint32_t stencil, const CommandBufferList &secondaryCBs);
     inline void beginRenderPass(RenderPass *renderPass, Framebuffer *fbo, const Rect &renderArea, const ColorList &colors, float depth, uint32_t stencil);
